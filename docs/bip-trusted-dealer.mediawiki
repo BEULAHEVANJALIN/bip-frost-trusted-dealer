@@ -1,0 +1,28 @@
+<pre>
+    BIP: TBD
+    Title: FROST Trusted Dealer Key Generation
+    Author: Beulah Evanjalin <beulahebenezer777@gmail.com>
+    Comments-Summary: No comments yet.
+    Comments-URI:
+    Status: Draft
+    Type: Informational
+    Created: TBD
+    License: CC0-1.0
+    License-Code: MIT
+    Post-History:
+    Requires: 340, 341
+</pre>
+
+== Abstract ==
+
+This BIP standardizes a trusted-dealer key-generation procedure for FROST (Flexible Round-Optimized Schnorr Threshold Signatures) on secp256k1. It produces a t-of-n Shamir sharing of a Schnorr secret together with a BIP340-compatible x-only group public key suitable for BIP341 Taproot key-path spending. The dealer samples coefficients for a degree-(t − 1) polynomial over the secp256k1 scalar field, publishes Feldman verifiable-secret-sharing (VSS) commitments {<i>A<sub>i</sub> = a<sub>i</sub> · G</i>} for i = 0 … t − 1, and privately delivers each signer’s share s<sub>j</sub> = f(j). The constant-term commitment <i>A<sub>0</sub></i> defines the internal key P.
+
+To prevent hidden script-path insertion by a malicious dealer in multiparty settings, P is deterministically converted to the Taproot output key Q using the BIP341 TapTweak tagged hash with an all-zero Merkle root, and applying the BIP340 even-y convention (i.e., <i>Q = ±P + tweak · G</i>). This specification fixes wire formats (x-only and 33-byte SEC compressed encodings), domain-separated tagged hashes, and share-verification equations so any implementation can validate dealer outputs and reconstruct Q from any subset of ≥ t public tweaked shares via Lagrange interpolation at 0. The resulting threshold keys and Taproot outputs are indistinguishable on-chain from standard single-key Taproot, preserving efficiency and privacy.
+
+Scope is limited to trusted-dealer key generation and verification; signing (nonce generation, challenge computation, partial signature aggregation) and distributed key generation are specified in companion bips.
+
+== Copyright ==
+
+This document is licensed under the Creative Commons CC0 1.0 Universal license (public domain).
+
+The reference implementation code and test vectors accompanying this BIP are licensed under the MIT License.
