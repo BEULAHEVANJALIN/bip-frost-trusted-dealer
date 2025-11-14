@@ -221,3 +221,132 @@ Algorithm: GroupPubFromShares(id<sub>1</sub>…id<sub>u</sub>, pubshare<sub>1</s
 *# Return cbytes(Q) (the 33-byte compressed encoding of the recovered group key point).
 (Any subset of ≥ t valid tweaked pubshares can be combined by Lagrange interpolation to recover the group public key Q. See below.)
 </div>
+
+
+=== Why this works ===
+
+This section explains why the algorithms above:
+* each participant's tweaked share is consistent with the public VSS commitments, and  
+* any subset of at least <math>t</math> tweaked public shares reconstructs the same group public key <math>Q</math>,  
+* while fewer than <math>t</math> shares do not determine the underlying scalar <math>a_0</math>.
+
+Let:
+* <math>n</math> be the order of the elliptic-curve group with base point <math>G</math>.
+* The Shamir secret-sharing polynomial be <math>f(X) = a_0 + a_1 X + \dots + a_{t-1} X^{t-1} \pmod n,</math> with coefficients <math>a_i \in [1, n-1]</math>.
+* The commitment points be <math>A_k = a_k \cdot G, \quad k = 0, \dots, t-1,</math> so in particular <math>A_0 = a_0 \cdot G</math>.
+* The point <math>P</math> be defined as <math>P = A_0</math>.
+* The tweak scalar be <math>\text{tweak} = \operatorname{int}(\operatorname{hash\_TapTweak}(\operatorname{xbytes}(P) \,\Vert\, 0^{32})) \bmod n.</math>
+* The parity scalar <math>g \in \{1, n-1\}</math> be defined as: <math>g =\begin{cases}
+  1, & \text{if } P \text{ has even } y\text{-coordinate},\\
+  n-1, & \text{otherwise}.
+  \end{cases}</math>
+
+The group public key is <math>Q = g \cdot P + \text{tweak} \cdot G
+  = g \cdot A_0 + \text{tweak} \cdot G
+  = g \cdot (a_0 \cdot G) + \text{tweak} \cdot G.</math>
+
+For participant <math>i \in \{1, \dots, N\}</math> with identifier <math>\operatorname{id}_i = i</math>, the (untweaked) scalar Shamir share is <math>f(\operatorname{id}_i) = a_0 + a_1 \operatorname{id}_i + \dots + a_{t-1} \operatorname{id}_i^{t-1} \pmod n.</math>
+
+The corresponding commitment point is
+
+<math>
+\begin{aligned}
+E_i
+&= A_0 + \operatorname{id}_i A_1 + \dots + \operatorname{id}_i^{t-1} A_{t-1} \\
+&= (a_0 + a_1 \operatorname{id}_i + \dots + a_{t-1} \operatorname{id}_i^{t-1}) \cdot G \\
+&= f(\operatorname{id}_i) \cdot G.
+\end{aligned}
+</math>
+
+The tweaked scalar share and tweaked public share point are <math>d_i = \bigl(g \cdot f(\operatorname{id}_i) + \text{tweak}\bigr) \bmod n,
+\qquad
+P_i^{Q} = d_i \cdot G.</math>
+
+==== Share-commitment consistency ====
+
+From the definitions above,
+
+<math>
+\begin{aligned}
+P_i^{Q}
+  &= d_i \cdot G \\
+  &= \bigl(g \cdot f(\operatorname{id}_i) + \text{tweak}\bigr) \cdot G \\
+  &= g \cdot \bigl(f(\operatorname{id}_i) \cdot G\bigr) + \text{tweak} \cdot G \\
+  &= g \cdot E_i + \text{tweak} \cdot G.
+\end{aligned}
+</math>
+
+Hence, for every participant <math>i</math>, <math>d_i \cdot G = g \cdot E_i + \text{tweak} \cdot G.</math>
+
+Algorithm {{mono|VerifyShare}} recomputes <math>E_i</math> from {{mono|vss_commitment}}, recomputes <math>g</math> and <math>\text{tweak}</math> from <math>A_0</math>, and verifies that <math>d \cdot G = g \cdot E_i + \text{tweak} \cdot G.</math>
+
+Therefore, any deviation in <math>d_i</math> from the form <math>g \cdot f(\operatorname{id}_i) + \text{tweak}</math> is detected as a verification failure.
+
+==== Lagrange interpolation and reconstruction of Q ====
+
+Let <math>S \subseteq \{1, \dots, N\}</math> be a set of indices with cardinality <math>|S| = u \ge t</math>. For each <math>i \in S</math>, let <math>\operatorname{id}_i</math> denote its identifier and let <math>\lambda_i</math> be the Lagrange interpolation coefficient at <math>X = 0</math> for the points <math>\{\operatorname{id}_j\}_{j \in S}</math>, as computed by {{mono|Lagrange}}.
+
+For any polynomial <math>f</math> of degree at most <math>t-1</math>, the Lagrange coefficients satisfy:
+
+<math>
+\sum_{i \in S} \lambda_i \, f(\operatorname{id}_i) = f(0) = a_0 \pmod n,
+\qquad
+\sum_{i \in S} \lambda_i = 1 \pmod n.
+</math>
+
+Using the definition of the tweaked shares: <math>d_i = g \cdot f(\operatorname{id}_i) + \text{tweak} \pmod n,</math> one obtains:
+
+<math>
+\begin{aligned}
+\sum_{i \in S} \lambda_i \, d_i
+&= \sum_{i \in S} \lambda_i \bigl(g \cdot f(\operatorname{id}_i) + \text{tweak}\bigr) \pmod n \\
+&= g \cdot \sum_{i \in S} \lambda_i f(\operatorname{id}_i)
+   \;+\; \text{tweak} \cdot \sum_{i \in S} \lambda_i \pmod n \\
+&= g \cdot a_0 + \text{tweak} \pmod n.
+\end{aligned}
+</math>
+
+Multiplying by <math>G</math> and using <math>P_i^{Q} = d_i \cdot G</math> yields:
+
+<math>
+\begin{aligned}
+\sum_{i \in S} \lambda_i \, P_i^{Q}
+&= \sum_{i \in S} \lambda_i (d_i \cdot G) \\
+&= \bigl(g \cdot a_0 + \text{tweak}\bigr) \cdot G \\
+&= g \cdot (a_0 \cdot G) + \text{tweak} \cdot G \\
+&= g \cdot A_0 + \text{tweak} \cdot G \\
+&= Q.
+\end{aligned}
+</math>
+
+Thus, any subset of at least <math>t</math> tweaked public shares satisfies <math>\sum_{i \in S} \lambda_i \, P_i^{Q} = Q.</math>
+
+Algorithm {{mono|GroupPubFromShares}} performs this computation on the input points {{mono|pubshare₁…pubshareᵤ}} and returns the unique group key <math>Q</math> consistent with them.
+
+==== Threshold property and secrecy ====
+
+* For any subset <math>S</math> with <math>|S| \ge t</math>, the above identity shows that {{mono|GroupPubFromShares}} reconstructs the same <math>Q</math> as {{mono|GroupPubkeyFromCommitment}}.
+* For any subset <math>S</math> with <math>|S| < t</math>, the values <math>\{f(\operatorname{id}_i)\}_{i \in S}</math> do not determine <math>a_0</math>, because there exist multiple degree-<math>(t-1)</math> polynomials over <math>\mathbb{Z}_n</math> consistent with these evaluations and having different constant terms. Therefore <math>a_0</math>, and hence <math>g \cdot a_0 + \text{tweak}</math>, remain undetermined from fewer than <math>t</math> shares.
+
+The affine transformation
+
+<math>
+a_0 \mapsto g \cdot a_0 + \text{tweak} \pmod n
+</math>
+
+preserves the information-theoretic secrecy properties of Shamir secret sharing; the threshold property is unchanged by the tweak.
+
+==== Detection of dealer misbehavior ====
+
+* {{mono|VerifyShare}} ensures that for each participant, the scalar share matches the commitment to <math>f</math> and the global tweak parameters derived from <math>A_0</math>. Any incorrect or inconsistent <math>d_i</math> fails the equation
+  <math>
+  d_i \cdot G = g \cdot E_i + \text{tweak} \cdot G.
+  </math>
+* {{mono|GroupPubkeyFromCommitment}} defines a unique group key <math>Q</math> from {{mono|vss_commitment}} alone. Any qualified subset can independently derive <math>Q</math> from their tweaked pubshares via {{mono|GroupPubFromShares}} and check equality. Disagreement implies invalid shares or inconsistent commitments.
+
+Consequently, a dealer that does not follow the specified construction produces shares or commitments that fail these verifications.
+
+
+== Acknowledgments ==
+
+== Copyright ==
