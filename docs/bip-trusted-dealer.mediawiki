@@ -105,7 +105,7 @@ This procedure generates ''t-of-N'' threshold shares of a ''tweaked'' group secr
 * ''vss_commitment = a tuple (A<sub>0</sub>, …, A<sub>t-1</sub>) of curve points, each given as a 33-byte SEC compressed encoding (cbytes). Here A<sub>k</sub> = a<sub>k</sub> · G for the dealer's chosen coefficients.
 * ''secshare<sub>i</sub> = a 32-byte scalar, equal to bytes(32, d<sub>i</sub>), representing signer i's secret tweaked share.
 * ''pubshare<sub>i</sub> = a 33-byte compressed point P<sub>i</sub><sup>Q</sup> = cbytes(P<sub>i</sub><sup>Q</sup>), representing signer i's public tweaked share.
-* ''grouppk_xonly = a 32-byte x-only public key = xbytes(Q), representing the threshold group public key usable in Taproot.
+* ''grouppk_xonly (derived, not published)'' = a 32-byte x-only public key = xbytes(Q), representing the threshold group public key usable in Taproot.
 
 Identifier set: ''id<sub>i</sub> = i'' for ''i ∈ {1,…,N}''. All IDs must be distinct and publicly known.
 
@@ -138,14 +138,14 @@ Algorithm ''TrustedDealerKeygen(N, t)'':
 *#** secshare<sub>i</sub> = bytes(32, d<sub>i</sub>) (32-byte scalar)
 *#** pubshare<sub>i</sub> = cbytes(P<sub>i</sub><sup>Q</sup>) (33-byte compressed point)
 *# Publish outputs:
-*#* Publish vss_commitment, the group public key grouppk_xonly = xbytes(Q), the parameters (N, t), and the list of participant identifiers (1, 2, …, N).
+*#* Publish vss_commitment, the parameters (N, t), and the list of participant identifiers (1, 2, …, N).
 *# Deliver shares privately:
 *#* Send each participant i their personal tuple (id<sub>i</sub> = i, secshare<sub>i</sub>). (Optionally, the dealer may also provide pubshare<sub>i</sub> to each participant, although each can recompute it.)
 ** Output:
-*** The dealer outputs (grouppk_xonly, vss_commitment, { (id<sub>i</sub>, secshare<sub>i</sub>) }<sub>i=1..N</sub>). Each participant receives their ID and secret share, and obtains the group public key and commitments (either directly or via a public bulletin).
+*** The dealer outputs (vss_commitment, { (id<sub>i</sub>, secshare<sub>i</sub>) }<sub>i=1..N</sub>). Each participant receives their ID and secret share, and derives ''grouppk_xonly = xbytes(Q)'' locally from ''A<sub>0</sub>'' via {{mono|GroupPubkeyFromCommitment}}.
 </div>
 
-Properties: For every ''i'', their tweaked share satisfies ''d<sub>i</sub>⋅G = P<sub>i</sub><sup>Q</sup>''. The published group key Q equals the x-only Taproot tweak of A<sub>0</sub> as defined above.
+Properties: For every ''i'', their tweaked share satisfies ''d<sub>i</sub>⋅G = P<sub>i</sub><sup>Q</sup>''. The derived group key Q equals the x-only Taproot tweak of A<sub>0</sub> as defined above.
 
 <div>
 Algorithm: ComputePubshare(id, vss_commitment):
@@ -187,7 +187,7 @@ Algorithm: GroupPubkeyFromCommitment(vss_commitment):
 *# Compute tweak = int(hash_TapTweak(xbytes(P) || 0<sup>32</sup>)) mod n.
 *# Let g = 1 if has_even_y(P), else g = n - 1.
 *# Compute Q = g · P + tweak · G. Fail if is_infinite(Q).
-*# Return (Q, xbytes(Q)) (the group public key point and its 32-byte x-only encoding).
+*# Return Q (and/or xbytes(Q)) for local use; this is a derived value and is not a published artifact of key generation.
 </div>
 
 <div>

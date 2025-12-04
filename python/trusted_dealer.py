@@ -165,7 +165,6 @@ def trusted_dealer_key_generation(t: int, n: int):
           * vss_commitment: [A_0, ..., A_{t-1}] Feldman commitments.
           * secret_shares:  List [d_1, ..., d_n] of tweaked secret shares.
           * public_shares:  List [P_1_Q, ..., P_n_Q] of tweaked pub shares.
-          * Q:              Tweaked group public key (Taproot internal key).
 
     Raises:
         ValueError: For invalid parameters or extremely unlikely edge cases
@@ -242,7 +241,7 @@ def trusted_dealer_key_generation(t: int, n: int):
         secret_shares.append(d_i)
         public_shares.append(P_i_Q)
 
-    return vss_commitment, secret_shares, public_shares, Q
+    return vss_commitment, secret_shares, public_shares
 
 def verify_share(participant_id: int, sec_share: Scalar, vss_commitment: list[GE]) -> bool:
     """
