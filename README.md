@@ -23,7 +23,7 @@ Q_{\text{out}} = g \cdot A_0 + \text{tweak} \cdot G,\quad g \in \{1,n-1\},
 $
 and for BIP340 signing semantics implementations use the even-$y$ representative
 $
-Q = \operatorname{with\_even\_y}(Q_{\text{out}}) = g_Q \cdot Q_{\text{out}},\quad g_Q \in \{1,n-1\}.
+Q = \text{with\_even\_y}(Q_{\text{out}}) = g_Q \cdot Q_{\text{out}},\quad g_Q \in \{1,n-1\}.
 $
 
 Note that $\text{xbytes}(Q)=\text{xbytes}(Q_{\text{out}})$; the on-chain Taproot output key is the x-only encoding.
@@ -76,7 +76,7 @@ This document adopts the same notation and helper functions as BIP340 for point 
   * The constant $n$ refers to the curve order  
     $n = \text{0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141}$.
 * Uppercase variables refer to points on the elliptic curve $y^2 = x^3 + 7$ over the finite field $\mathbb{F}_p$.
-  * $\operatorname{is\_infinite}(P)$ returns whether $P$ is the point at infinity.
+  * $\text{is\_infinite}(P)$ returns whether $P$ is the point at infinity.
   * $x(P)$ and $y(P)$ are integers in the range $[0, p-1]$ representing the affine coordinates of $P$, assuming $P$ is not infinity.
   * The constant $G$ denotes the base point, with  
     $x(G) = \text{0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798}$,  
@@ -88,15 +88,15 @@ This document adopts the same notation and helper functions as BIP340 for point 
   * $\oplus$ denotes byte-wise XOR on equal-length byte arrays.
   * The function $x[i:j]$, where $x$ is a byte array and $i, j \ge 0$, returns a $(j - i)$-byte array containing bytes $i$ (inclusive) through $j$ (exclusive) of $x$.
   * The function $\text{bytes}(n, x)$, where $x$ is an integer, returns the $n$-byte big-endian encoding of $x$.
-  * The constant $\operatorname{empty\_bytestring}$ refers to the empty byte array, for which $\text{len}(\operatorname{empty\_bytestring}) = 0$.
-  * The function $\text{xbytes}(P)$, where $P$ is a point for which $\neg \operatorname{is\_infinite}(P)$, returns $\text{bytes}(32, x(P))$.
+  * The constant $\text{empty\_bytestring}$ refers to the empty byte array, for which $\text{len}(\text{empty\_bytestring}) = 0$.
+  * The function $\text{xbytes}(P)$, where $P$ is a point for which $\neg \text{is\_infinite}(P)$, returns $\text{bytes}(32, x(P))$.
   * The function $\text{len}(x)$ returns the length of byte array $x$.
-  * The function $\operatorname{has\_even\_y}(P)$, where $P$ is not infinity, returns true iff $y(P) \bmod 2 = 0$.
-  * The function $\operatorname{with\_even\_y}(P)$ returns $P$ if $P$ is infinite or has even $y$; otherwise it returns $-P$.
+  * The function $\text{has\_even\_y}(P)$, where $P$ is not infinity, returns true iff $y(P) \bmod 2 = 0$.
+  * The function $\text{with\_even\_y}(P)$ returns $P$ if $P$ is infinite or has even $y$; otherwise it returns $-P$.
   * The function $\text{cbytes}(P)$, where $P$ is not infinity, returns $a \|\| \text{xbytes}(P)$, where $a = 2$ if $P$ has even $y$, and $a = 3$ otherwise.
-  * The function $\operatorname{cbytes\_ext}(P)$ returns $\text{bytes}(33, 0)$ if $P$ is infinite; otherwise it returns $\text{cbytes}(P)$.
+  * The function $\text{cbytes\_ext}(P)$ returns $\text{bytes}(33, 0)$ if $P$ is infinite; otherwise it returns $\text{cbytes}(P)$.
   * The function $\text{int}(x)$, where $x$ is a 32-byte array, returns the 256-bit unsigned integer whose most significant byte first encoding is $x$.
-  * The function $\operatorname{lift\_x}(x)$, for $x \in [0, 2^{256} - 1]$, returns the point $P$ with even $y$ such that $x(P) = x$, or fails if no such point exists.  
+  * The function $\text{lift\_x}(x)$, for $x \in [0, 2^{256} - 1]$, returns the point $P$ with even $y$ such that $x(P) = x$, or fails if no such point exists.  
     Given a candidate $x \in [0, p-1]$, compute:
     * Fail if $x > p - 1$.
     * Let $c = x^3 + 7 \bmod p$.
@@ -105,9 +105,9 @@ This document adopts the same notation and helper functions as BIP340 for point 
     * Let $y = y'$ if $y' \bmod 2 = 0$, otherwise let $y = p - y'$.
     * Return the unique point $P$ such that $x(P) = x$ and $y(P) = y$.
   * The function $\text{cpoint}(x)$, where $x$ is a 33-byte array (compressed serialization), sets  
-    $P = \operatorname{lift\_x}(\text{int}(x[1:33]))$ and fails if that fails.  
+    $P = \text{lift\_x}(\text{int}(x[1:33]))$ and fails if that fails.  
     If $x[0] = 2$ it returns $P$; if $x[0] = 3$ it returns $-P$; otherwise it fails.
-  * The function $\operatorname{cpoint\_ext}(x)$ returns the point at infinity if $x = \text{bytes}(33, 0)$. Otherwise, it returns $\text{cpoint}(x)$ and fails if that fails.
+  * The function $\text{cpoint\_ext}(x)$ returns the point at infinity if $x = \text{bytes}(33, 0)$. Otherwise, it returns $\text{cpoint}(x)$ and fails if that fails.
   * The function $\text{hash}_{\text{tag}}(x)$ returns  
     $\text{SHA256}(\text{SHA256(tag)} \|\| \text{SHA256(tag)} \|\| x)$.
   * The function $\text{modinv}(z)$ returns the multiplicative inverse of nonzero $z \bmod n$. Fail if $z \equiv 0 \pmod n$.
@@ -139,7 +139,7 @@ $
 \text{tweak} =
 \text{int}\!\left(
   \text{hash}_{\text{TapTweak}}
-  \bigl(\text{xbytes}(A_0)\|\|\operatorname{empty\_bytestring}\bigr)
+  \bigl(\text{xbytes}(A_0)\|\|\text{empty\_bytestring}\bigr)
 \right)
 \bmod n
 $
@@ -149,7 +149,7 @@ derived from the first commitment.
 
 * **vss_commitment** = a tuple  
   $
-  (\operatorname{cbytes\_ext}(A_0), \dots, \operatorname{cbytes\_ext}(A_{t-1}))
+  (\text{cbytes\_ext}(A_0), \dots, \text{cbytes\_ext}(A_{t-1}))
   $ of 33-byte encodings. Here $A_k = a_k \cdot G$ for the dealer's chosen coefficients.
   * Note: coefficients $a_k$ for $1 \le k \le t-2$ are sampled from $[0..n-1]$ and may be zero (so $A_k$ may be infinity). If $t>1$, the dealer samples $a_{t-1} \in [1..n-1]$, so $A_{t-1}$ is never infinity.
 * **secshare<sub>i</sub>** = a 32-byte big-endian encoding $\text{bytes}(32,d_i)$ of an integer $d_i$ with $1 \le d_i \le n-1$. Parsers MUST reject encodings with $d_i=0$ or $d_i \ge n$ (no modular reduction on parse).
@@ -179,23 +179,23 @@ The algorithms below are specified with an emphasis on clarity rather than optim
 2. **Commitments to untweaked polynomial:**
    * For each $k = 0 \dots t-1$, compute the commitment point $A_k = a_k \cdot G$.
    * Let $\text{vss\_commitment} =
-     (\operatorname{cbytes\_ext}(A_0), \operatorname{cbytes\_ext}(A_1), \dots, \operatorname{cbytes\_ext}(A_{t-1})).
+     (\text{cbytes\_ext}(A_0), \text{cbytes\_ext}(A_1), \dots, \text{cbytes\_ext}(A_{t-1})).
      $
 
 3. **Derive the public x-only tweak:**
    * Let $P = A_0$ (the initial commitment point).
-   * Fail if $\operatorname{is\_infinite}(P)$.
+   * Fail if $\text{is\_infinite}(P)$.
    * Compute $\text{tweak} =
      \text{int}\!\left(
        \text{hash}_{\text{TapTweak}}
-       (\text{xbytes}(P)\|\|\operatorname{empty\_bytestring})
+       (\text{xbytes}(P)\|\|\text{empty\_bytestring})
      \right) \bmod n,
      $
      i.e., TapTweak of the x-only internal key and an *empty* Merkle root.
-   * Let $g = 1$ if $\operatorname{has\_even\_y}(P)$, otherwise let $g = n - 1$ (which is $\equiv -1 \pmod n$).
+   * Let $g = 1$ if $\text{has\_even\_y}(P)$, otherwise let $g = n - 1$ (which is $\equiv -1 \pmod n$).
    * Compute the Taproot output key point (pre-even-y) $Q_{\text{out}} = g \cdot P + \text{tweak} \cdot G.$
-     Fail if $\operatorname{is\_infinite}(Q_{\text{out}})$.
-   * Let $g_Q = 1$ if $\operatorname{has\_even\_y}(Q_{\text{out}})$, else let $g_Q = n - 1$.
+     Fail if $\text{is\_infinite}(Q_{\text{out}})$.
+   * Let $g_Q = 1$ if $\text{has\_even\_y}(Q_{\text{out}})$, else let $g_Q = n - 1$.
    * Set $Q \leftarrow g_Q \cdot Q_{\text{out}}.$
      (Now $Q$ has even $y$; $\text{xbytes}(Q)=\text{xbytes}(Q_{\text{out}})$.)
    * Note: recipients derive the x-only Taproot output key as $\text{xbytes}(Q)$.  
@@ -217,7 +217,7 @@ The algorithms below are specified with an emphasis on clarity rather than optim
    * (Optional check) Let $E = A_0 + \text{id} \cdot A_1 + \dots + \text{id}^{t-1} \cdot A_{t-1}.$
    * Check $P_i^Q = g_Q \cdot (g \cdot E + \text{tweak} \cdot G).$
      (Equivalently,
-     $P_i^Q = \operatorname{with\_even\_y}(g \cdot E + \text{tweak} \cdot G)$
+     $P_i^Q = \text{with\_even\_y}(g \cdot E + \text{tweak} \cdot G)$
      with the same $g_Q$ derived from $Q_{\text{out}}$.)
 
 6. **Serialize the outputs for participant $i$:**
@@ -249,8 +249,8 @@ The derived group key $Q$ equals the x-only Taproot tweak of $A_0$ as defined ab
 * **vss_commitment**: tuple $(A_0, \dots, A_{t-1})$.
 
 **Procedure:**
-1. Let $t = \operatorname{len}(\operatorname{vss\_commitment}).$
-2. For $k = 0 \dots t-1$, parse $A_k = \operatorname{cpoint\_ext}(\operatorname{vss\_commitment}[k]).$
+1. Let $t = \text{len}(\text{vss\_commitment}).$
+2. For $k = 0 \dots t-1$, parse $A_k = \text{cpoint\_ext}(\text{vss\_commitment}[k]).$
    Fail if parsing fails.
 3. Compute the curve point $E = A_0 + \text{id} \cdot A_1 + \dots + \text{id}^{t-1} \cdot A_{t-1}.$
 4. Return $E$ (committed evaluation point).
@@ -262,8 +262,8 @@ The derived group key $Q$ equals the x-only Taproot tweak of $A_0$ as defined ab
 * **vss_commitment**: tuple $(A_0, \dots, A_{t-1})$.
 
 **Procedure:**
-1. Let $E = \text{ComputeCommittedPoint}(\text{id}, \operatorname{vss\_commitment}).$
-2. Parse $A_0 = \operatorname{cpoint\_ext}(\operatorname{vss\_commitment}[0]).$
+1. Let $E = \text{ComputeCommittedPoint}(\text{id}, \text{vss\_commitment}).$
+2. Parse $A_0 = \text{cpoint\_ext}(\text{vss\_commitment}[0]).$
    Fail if parsing fails.
 3. Let $P = A_0$; recompute $(\text{tweak}, g)$ from $P$ as in key generation.
 4. Compute $Q_{\text{out}} = g \cdot A_0 + \text{tweak} \cdot G$
@@ -282,24 +282,24 @@ The derived group key $Q$ equals the x-only Taproot tweak of $A_0$ as defined ab
 1. **Parse and check values:**
    * Let $d = \text{int}(\text{secshare}).$
      Fail if $d = 0$ or $d \ge n$ (share is out of range or zero).
-   * Parse $A_0 = \operatorname{cpoint\_ext}(\operatorname{vss\_commitment}[0]).$
+   * Parse $A_0 = \text{cpoint\_ext}(\text{vss\_commitment}[0]).$
      Fail if parsing fails.
-   * Let $P = A_0$. Fail if $\operatorname{is\_infinite}(P)$.
+   * Let $P = A_0$. Fail if $\text{is\_infinite}(P)$.
 
 2. **Recompute tweak and parity:**
    * Compute $
      \text{tweak} =
      \text{int}\!\left(
        \text{hash}_{\text{TapTweak}}
-       (\text{xbytes}(P)\|\|\operatorname{empty\_bytestring})
+       (\text{xbytes}(P)\|\|\text{empty\_bytestring})
      \right)
      \bmod n.
      $
-   * Let $g = 1$ if $\operatorname{has\_even\_y}(P)$, else let $g = n - 1$.
+   * Let $g = 1$ if $\text{has\_even\_y}(P)$, else let $g = n - 1$.
 
 3. **Recompute expected public share:**
    * Compute $P^Q =
-     \text{ComputeTweakedPubshare}(\text{id}, \operatorname{vss\_commitment}).
+     \text{ComputeTweakedPubshare}(\text{id}, \text{vss\_commitment}).
      $
 
 4. **Verify:**
@@ -313,21 +313,21 @@ The derived group key $Q$ equals the x-only Taproot tweak of $A_0$ as defined ab
 
 **Procedure:**
 
-1. Parse $A_0 = \operatorname{cpoint\_ext}(\operatorname{vss\_commitment}[0]).$
+1. Parse $A_0 = \text{cpoint\_ext}(\text{vss\_commitment}[0]).$
    Fail if parsing fails.
 2. Let $P = A_0$.
 3. Compute $
    \text{tweak} =
    \text{int}\!\left(
      \text{hash}_{\text{TapTweak}}
-     (\text{xbytes}(P)\|\|\operatorname{empty\_bytestring})
+     (\text{xbytes}(P)\|\|\text{empty\_bytestring})
    \right)
    \bmod n.
    $
-4. Let $g = 1$ if $\operatorname{has\_even\_y}(P)$, else let $g = n - 1$.
+4. Let $g = 1$ if $\text{has\_even\_y}(P)$, else let $g = n - 1$.
 5. Compute $Q_{\text{out}} = g \cdot P + \text{tweak} \cdot G.$
-   Fail if $\operatorname{is\_infinite}(Q_{\text{out}})$.
-6. Let $g_Q = 1$ if $\operatorname{has\_even\_y}(Q_{\text{out}})$, else let $g_Q = n - 1$.
+   Fail if $\text{is\_infinite}(Q_{\text{out}})$.
+6. Let $g_Q = 1$ if $\text{has\_even\_y}(Q_{\text{out}})$, else let $g_Q = n - 1$.
 7. Set $Q \leftarrow g_Q \cdot Q_{\text{out}}.$
 8. Return $Q$ (even-$y$ full point for BIP340 signing semantics) and/or $\text{xbytes}(Q)$ (x-only Taproot output key).  
    Note $\text{xbytes}(Q)=\text{xbytes}(Q_{\text{out}})$.
@@ -346,7 +346,7 @@ The derived group key $Q$ equals the x-only Taproot tweak of $A_0$ as defined ab
 3. For each $j$ from $1$ to $u$, with $\text{id}_j \ne \text{id}$:
    * Update $\text{num} = (\text{num} \cdot \text{id}_j) \bmod n.$
    * Update $\text{denom} = (\text{denom} \cdot (\text{id}_j - \text{id})) \bmod n.$
-4. Compute $\lambda = \text{num} \cdot \operatorname{modinv}(\text{denom}) \bmod n.$
+4. Compute $\lambda = \text{num} \cdot \text{modinv}(\text{denom}) \bmod n.$
 5. Return $\lambda$.
 
 (This computes the Lagrange interpolation coefficient $\lambda$ for the share with identifier = *id*, for evaluating a polynomial at $X = 0$.)
@@ -360,13 +360,13 @@ The derived group key $Q$ equals the x-only Taproot tweak of $A_0$ as defined ab
 **Procedure:**
 
 1. For each $i = 1 \dots u$:
-   * Parse $\text{pubshare}_i$ to a point $P_i = \operatorname{cpoint}(\text{pubshare}_i).$
+   * Parse $\text{pubshare}_i$ to a point $P_i = \text{cpoint}(\text{pubshare}_i).$
      Fail if any parsing fails or any $P_i$ is infinity.
 2. Initialize $Q$ to the point at infinity.
 3. For each $i = 1 \dots u$:
    * Compute $\lambda_i = \text{Lagrange}(id_1, \dots, id_u, id_i).$
    * Update $Q = Q + \lambda_i \cdot P_i.$
-4. Fail if $\operatorname{is\_infinite}(Q)$.
-5. Return $\operatorname{cbytes}(Q).$
+4. Fail if $\text{is\_infinite}(Q)$.
+5. Return $\text{cbytes}(Q).$
 
 (Any subset of at least $t$ valid tweaked public shares can be combined by Lagrange interpolation to recover the group public key $Q$. See below.)
