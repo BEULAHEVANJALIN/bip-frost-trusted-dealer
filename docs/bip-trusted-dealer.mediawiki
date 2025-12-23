@@ -1,25 +1,36 @@
 <pre>
-    BIP: TBD
-    Title: FROST Trusted Dealer Key Generation
-    Author: Beulah Evanjalin <beulahebenezer777@gmail.com>
-    Comments-Summary: No comments yet.
-    Comments-URI:
-    Status: Draft
-    Type: Informational
-    Created: TBD
-    License: CC0-1.0
-    License-Code: MIT
-    Post-History:
-    Requires: 340, 341
+  BIP: TBD
+  Title: FROST Trusted Dealer Key Generation
+  Author: Beulah Evanjalin <beulahebenezer777@gmail.com>
+  Comments-Summary: No comments yet.
+  Comments-URI:
+  Status: Draft
+  Type: Informational
+  Created: TBD
+  License: CC0-1.0
+  License-Code: MIT
+  Post-History:
+  Requires: 340, 341
 </pre>
 
 == Abstract ==
 
-This BIP standardizes a trusted-dealer key-generation procedure for FROST (Flexible Round-Optimized Schnorr Threshold Signatures) on secp256k1. It produces a t-of-n Shamir sharing of a Schnorr secret together with a BIP340-compatible x-only group public key suitable for BIP341 Taproot key-path spending. The dealer samples coefficients for a degree-(t - 1) polynomial over the secp256k1 scalar field, publishes Feldman verifiable-secret-sharing (VSS) commitments {<i>A<sub>i</sub> = a<sub>i</sub> · G</i>} for i = 0 … t - 1, and privately delivers each signer's share s<sub>j</sub> = f(j). The constant-term commitment <i>A<sub>0</sub></i> defines the internal key P.
+This BIP standardizes a trusted-dealer key-generation procedure for FROST (Flexible Round-Optimized Schnorr Threshold Signatures) on secp256k1. It produces a t-of-n Shamir sharing together with a BIP340-compatible x-only group public key suitable for BIP341 Taproot key-path spending. The dealer samples coefficients for a degree-(t - 1) polynomial over the secp256k1 scalar field, publishes Feldman verifiable-secret-sharing (VSS) commitments <math>A_k = a_k \cdot G</math> for <math>k = 0, \dots, t-1</math>, and privately delivers each signer's tweaked share <math>d_i</math>. The constant-term commitment <math>A_0</math> defines the (untweaked) internal key point.
 
-To prevent hidden script-path insertion by a malicious dealer in multiparty settings, P is deterministically converted to the Taproot output key Q using the BIP341 TapTweak tagged hash with an all-zero Merkle root, and applying the BIP340 even-y convention (i.e., <i>Q = ±P + tweak · G</i>). This specification fixes wire formats (x-only and 33-byte SEC compressed encodings), domain-separated tagged hashes, and share-verification equations so any implementation can validate dealer outputs and reconstruct Q from any subset of ≥ t public tweaked shares via Lagrange interpolation at 0. The resulting threshold keys and Taproot outputs are indistinguishable on-chain from standard single-key Taproot, preserving efficiency and privacy.
+To prevent hidden script-path insertion by a malicious dealer in multiparty settings, the internal key derived from <math>A_0</math> is deterministically converted to the Taproot output key <math>Q</math> using BIP341 TapTweak with an empty Merkle root (no script path), applying the BIP340 even-y convention. Concretely,
+<math>
+Q_{\text{out}} = g \cdot A_0 + \text{tweak} \cdot G,\quad g \in \{1,n-1\},
+</math>
+and for BIP340 signing semantics implementations use the even-y representative
+<math>
+Q = \operatorname{with\_even\_y}(Q_{\text{out}}) = g_Q \cdot Q_{\text{out}},\quad g_Q \in \{1,n-1\}.
+</math>
 
-Scope is limited to trusted-dealer key generation and verification; signing (nonce generation, challenge computation, partial signature aggregation) and distributed key generation are specified in companion bips.
+Note that <math>\text{xbytes}(Q)=\text{xbytes}(Q_{\text{out}})</math>; the on-chain Taproot output key is the x-only encoding.
+
+The resulting threshold keys and Taproot outputs are indistinguishable on-chain from standard single-key Taproot outputs, preserving efficiency and privacy.
+
+Scope is limited to trusted-dealer key generation and verification; signing (nonce generation, challenge computation, partial signature aggregation) and distributed key generation are specified in companion BIPs.
 
 == Copyright ==
 
@@ -29,324 +40,245 @@ The reference implementation code and test vectors accompanying this BIP are lic
 
 == Specification ==
 
-This section defines the protocol for trusted-dealer FROST key generation on secp256k1. It produces tweaked secret shares d<sub>i</sub> and a group public key Q compatible with BIP340 Schnorr signatures and BIP341 Taproot outputs, using Feldman VSS for verifiability. All arithmetic is on the secp256k1 curve defined by equation y<sup>2</sup> = x<sup>3</sup> + 7 over the field F<sub>p</sub> (with prime p = 2<sup>256</sup> - 2<sup>32</sup> - 977), and in the scalar field of order ''n = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141''. The base point G has coordinates ''<i>x(G) =</i> 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798'', ''<i>y(G) =</i> 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8''.
+This section defines the protocol for trusted-dealer FROST key generation on secp256k1. It produces tweaked secret shares <math>d_i</math> and a group public key <math>Q</math> compatible with BIP340 Schnorr signatures and BIP341 Taproot outputs, using Feldman verifiable secret sharing (VSS) for verifiability.
 
-The following specification of the algorithms has been written with a focus on clarity.
-As a result, the specified algorithms are not always optimal in terms of computation and space. We note that adapting this proposal to other elliptic curves is not straightforward and can result in an insecure scheme.
+All arithmetic is performed on the secp256k1 elliptic curve defined by
+<math>
+y^2 = x^3 + 7
+</math>
+over the finite field <math>\mathbb{F}_p</math>, where
+<math>
+p = 2^{256} - 2^{32} - 977.
+</math>
+Scalar arithmetic is performed modulo the curve order
+<math>
+n = \text{0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141}.
+</math>
+The base point <math>G</math> has coordinates
+<math>
+x(G) = \text{0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798},
+</math>
+<math>
+y(G) = \text{0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8}.
+</math>
+
+The following specification of the algorithms is written with a focus on clarity. As a result, the specified algorithms are not always optimal in terms of computation or space. Adapting this proposal to elliptic curves other than secp256k1 is non-trivial and may result in an insecure scheme.
 
 === Notation and Conventions ===
 
-The following conventions are used, with constants as defined for [https://www.secg.org/sec2-v2.pdf secp256k1]. We note that adapting this proposal to other elliptic curves is not straightforward and can result in an insecure scheme. 
+The following conventions are used, with constants as defined for secp256k1. Adapting this proposal to elliptic curves other than secp256k1 is non-trivial and may result in an insecure scheme.
 
-We adopt the same notation and helper functions as BIP340 for point and scalar operations on secp256k1.
+This document adopts the same notation and helper functions as BIP340 for point and scalar operations on secp256k1.
 
 * Lowercase variables represent integers or byte arrays.
-** The constant ''p'' refers to the field size, ''0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F''.
-** The constant ''n'' refers to the curve order, ''0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141''.
-* Uppercase variables refer to points on the curve with equation ''y<sup>2</sup> = x<sup>3</sup> + 7'' over the integers modulo ''p''.
-** ''is_infinite(P)'' returns whether ''P'' is the point at infinity.
-** ''x(P)'' and ''y(P)'' are integers in the range ''0...p-1'' and refer to the X and Y coordinates of a point ''P'' (assuming it is not infinity).
-** The constant ''G'' refers to the base point, for which ''x(G) = 0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798'' and ''y(G) = 0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8''.
+** The constant <math>p</math> refers to the field size <math>p = \text{0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F}.</math>
+** The constant <math>n</math> refers to the curve order <math>n = \text{0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141}.</math>
+* Uppercase variables refer to points on the elliptic curve <math>y^2 = x^3 + 7</math> over the finite field <math>\mathbb{F}_p</math>.
+** <math>\operatorname{is\_infinite}(P)</math> returns whether <math>P</math> is the point at infinity.
+** <math>x(P)</math> and <math>y(P)</math> are integers in the range <math>[0, p-1]</math> representing the affine coordinates of <math>P</math>, assuming <math>P</math> is not infinity.
+** The constant <math>G</math> denotes the base point, with <math>x(G) = \text{0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798},</math> <math>y(G) = \text{0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8}.</math>
 ** Addition of points refers to the usual [https://en.wikipedia.org/wiki/Elliptic_curve#The_group_law elliptic curve group operation].
-** [https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication Multiplication (⋅) of an integer and a point] refers to the repeated application of the group operation.
+** [https://en.wikipedia.org/wiki/Elliptic_curve_point_multiplication Multiplication of an integer and a point], <math>k \cdot P</math> refers to the repeated application of the group operation.
 * Functions and operations:
-** ''||'' refers to byte array concatenation.
-** ''⊕'' is byte-wise ⊕ on equal-length byte strings.
-** The function ''x[i:j]'', where ''x'' is a byte array and ''i, j &ge; 0'', returns a ''(j - i)''-byte array with a copy of the ''i''-th byte (inclusive) to the ''j''-th byte (exclusive) of ''x''.
-** The function ''bytes(n, x)'', where ''x'' is an integer, returns the n-byte encoding of ''x'', most significant byte first.
-** The constant ''empty_bytestring'' refers to the empty byte array. It holds that ''len(empty_bytestring) = 0''.
-** The function ''xbytes(P)'', where ''P'' is a point for which ''not is_infinite(P)'', returns ''bytes(32, x(P))''.
-** The function ''len(x)'' where ''x'' is a byte array returns the length of the array.
-** The function ''has_even_y(P)'', where ''P'' is a point for which ''not is_infinite(P)'', returns ''y(P) mod 2 == 0''.
-** The function ''with_even_y(P)'', where ''P'' is a point, returns ''P'' if ''is_infinite(P)'' or ''has_even_y(P)''. Otherwise,  ''with_even_y(P)'' returns ''-P''.
-** The function ''cbytes(P)'', where ''P'' is a point for which ''not is_infinite(P)'', returns ''a || xbytes(P)'' where ''a'' is a byte that is ''2'' if ''has_even_y(P)'' and ''3'' otherwise.
-** The function ''cbytes_ext(P)'', where ''P'' is a point, returns ''bytes(33, 0)'' if ''is_infinite(P)''. Otherwise, it returns ''cbytes(P)''.
-** The function ''int(x)'', where ''x'' is a 32-byte array, returns the 256-bit unsigned integer whose most significant byte first encoding is ''x''.
-** The function ''lift_x(x)'', where ''x'' is an integer in range ''0..2<sup>256</sup>-1'', returns the point ''P'' for which ''x(P) = x''<ref>
-    Given a candidate X coordinate ''x'' in the range ''0..p-1'', there exist either exactly two or exactly zero valid Y coordinates. If no valid Y coordinate exists, then ''x'' is not a valid X coordinate either, i.e., no point ''P'' exists for which ''x(P) = x''. The valid Y coordinates for a given candidate ''x'' are the square roots of ''c = x<sup>3</sup> + 7 mod p'' and they can be computed as ''y = &plusmn;c<sup>(p+1)/4</sup> mod p'' (see [https://en.wikipedia.org/wiki/Quadratic_residue#Prime_or_prime_power_modulus Quadratic residue]) if they exist, which can be checked by squaring and comparing with ''c''.</ref> and ''has_even_y(P)'', or fails if ''x'' is greater than ''p-1'' or no such point exists. The function ''lift_x(x)'' is equivalent to the following pseudocode:
-*** Fail if ''x &gt; p-1''.
-*** Let ''c = x<sup>3</sup> + 7 mod p''.
-*** Let ''y' = c<sup>(p+1)/4</sup> mod p''.
-*** Fail if ''c &ne; y'<sup>2</sup> mod p''.
-*** Let ''y = y' '' if ''y' mod 2 = 0'', otherwise let ''y = p - y' ''.
-*** Return the unique point ''P'' such that ''x(P) = x'' and ''y(P) = y''.
-** The function ''cpoint(x)'', where ''x'' is a 33-byte array (compressed serialization), sets ''P = lift_x(int(x[1:33]))'' and fails if that fails. If ''x[0] = 2'' it returns ''P'' and if ''x[0] = 3'' it returns ''-P''. Otherwise, it fails.
-** The function ''cpoint_ext(x)'', where ''x'' is a 33-byte array (compressed serialization), returns the point at infinity if ''x = bytes(33, 0)''. Otherwise, it returns ''cpoint(x)'' and fails if that fails.
-** The function ''hash<sub>tag</sub>(x)'' where ''tag'' is a UTF-8 encoded tag name and ''x'' is a byte array returns the 32-byte hash ''SHA256(SHA256(tag) || SHA256(tag) || x)''.
-** The function ''modinv(z)'' returns the multiplicative inverse of nonzero ''z mod n''. Fail if ''z ≡ 0 (mod n)''.
+** <math>\|\|</math> denotes byte array concatenation.
+** <math>\oplus</math> denotes byte-wise XOR on equal-length byte arrays.
+** The function <math>x[i:j]</math>, where <math>x</math> is a byte array and <math>i, j \ge 0</math>, returns a <math>(j - i)</math>-byte array containing bytes <math>i</math> (inclusive) through <math>j</math> (exclusive) of <math>x</math>.
+** The function <math>\text{bytes}(n, x)</math>, where <math>x</math> is an integer, returns the <math>n</math>-byte big-endian encoding of <math>x</math>.
+** The constant <math>\operatorname{empty\_bytestring}</math> refers to the empty byte array, for which <math>\text{len}(\operatorname{empty\_bytestring}) = 0</math>.
+** The function <math>\text{xbytes}(P)</math>, where <math>P</math> is a point for which <math>\neg \operatorname{is\_infinite}(P)</math>, returns <math>\text{bytes}(32, x(P))</math>.
+** The function <math>\text{len}(x)</math> returns the length of byte array <math>x</math>.
+** The function <math>\operatorname{has\_even\_y}(P)</math>, where <math>P</math> is not infinity, returns true iff <math>y(P) \bmod 2 = 0</math>.
+** The function <math>\operatorname{with\_even\_y}(P)</math> returns <math>P</math> if <math>P</math> is infinite or has even <math>y</math>; otherwise it returns <math>-P</math>.
+** The function <math>\text{cbytes}(P)</math>, where <math>P</math> is not infinity, returns <math>a \|\| \text{xbytes}(P)</math>, where <math>a = 2</math> if <math>P</math> has even <math>y</math>, and <math>a = 3</math> otherwise.
+** The function <math>\operatorname{cbytes\_ext}(P)</math> returns <math>\text{bytes}(33, 0)</math> if <math>P</math> is infinite; otherwise it returns <math>\text{cbytes}(P)</math>.
+** The function <math>\text{int}(x)</math>, where <math>x</math> is a 32-byte array, returns the 256-bit unsigned integer whose most significant byte first encoding is <math>x</math>.
+** The function <math>\operatorname{lift\_x}(x)</math>, for <math>x \in [0, 2^{256} - 1]</math>, returns the point <math>P</math> with even <math>y</math> such that <math>x(P) = x</math><ref>Given a candidate X coordinate ''x'' in the range ''0..p-1'', there exist either exactly two or exactly zero valid Y coordinates. If no valid Y coordinate exists, then ''x'' is not a valid X coordinate either, i.e., no point ''P'' exists for which ''x(P) = x''. The valid Y coordinates for a given candidate ''x'' are the square roots of ''c = x<sup>3</sup> + 7 mod p'' and they can be computed as ''y = &plusmn;c<sup>(p+1)/4</sup> mod p'' (see [https://en.wikipedia.org/wiki/Quadratic_residue#Prime_or_prime_power_modulus Quadratic residue]) if they exist, which can be checked by squaring and comparing with ''c''.</ref>, or fails if no such point exists. The function <math>\operatorname{lift\_x}(x)</math> is equivalent to the following pseudocode:
+*** Fail if <math>x > p - 1</math>.
+*** Let <math>c = x^3 + 7 \bmod p</math>.
+*** Let <math>y' = c^{(p+1)/4} \bmod p</math>.
+*** Fail if <math>y'^2 \not\equiv c \pmod p</math>.
+*** Let <math>y = y'</math> if <math>y' \bmod 2 = 0</math>, otherwise let <math>y = p - y'</math>.
+*** Return the unique point <math>P</math> such that <math>x(P) = x</math> and <math>y(P) = y</math>.
+** The function <math>\text{cpoint}(x)</math>, where <math>x</math> is a 33-byte array (compressed serialization), sets <math>P = \operatorname{lift\_x}(\text{int}(x[1:33]))</math> and fails if that fails. If <math>x[0] = 2</math> it returns <math>P</math>; if <math>x[0] = 3</math> it returns <math>-P</math>; otherwise it fails.
+** The function <math>\operatorname{cpoint\_ext}(x)</math> returns the point at infinity if <math>x = \text{bytes}(33, 0)</math>. Otherwise, it returns <math>\text{cpoint}(x)</math> and fails if that fails.
+** The function <math>\text{hash}_{\text{tag}}(x)</math>, where <math>\text{tag}</math> is a UTF-8 encoded tag name and <math>x</math> is a byte array, returns the 32-byte hash <math>\text{SHA256}(\text{SHA256(tag)} \|\| \text{SHA256(tag)} \|\| x).</math>
+** The function <math>\text{modinv}(z)</math> returns the multiplicative inverse of nonzero <math>z \bmod n</math>. Fail if <math>z \equiv 0 \pmod n</math>.
 * Scalars and reductions:
-** Unless stated otherwise, scalar additions/multiplications/negations are computed modulo ''n'' and then represented as 32-byte big-endian via ''bytes(32, ·)'' when serialized.
-** When a 32-byte string is interpreted ''as a scalar'', it means ''int(x) mod n''. Algorithms that require nonzero scalars will explicitly fail on result ''0''.
+** Unless stated otherwise, scalar additions, multiplications, and negations are computed modulo ''n'' and then represented as 32-byte big-endian via ''bytes(32, ·)'' when serialized.
+** When a 32-byte string is interpreted ''as a scalar'', it means <math>\text{int}(x) \bmod n</math>. Algorithms that require nonzero scalars will explicitly fail on result ''0''.
 ** Tuples are written by listing the elements within parentheses and separated by commas. For example, ''(2, 3, 1)'' is a tuple.
 * Signer identifiers:
-** Each participant has a unique positive integer identifier ''id ∈ {1,2,…,2<sup>32</sup>}''. Identifiers must be unique within a session.
+** Each participant has a unique positive integer identifier ''id'' <math>\in \{1,2,\dots,2^{32}-1\}</math>. Identifiers must be unique within a session.
 ** Identifiers are interpreted as integers when computing Lagrange coefficients; arithmetic for these coefficients is performed modulo ''n''.
 ** As a practical constraint, implementations should restrict ''id'' to a small nonzero 32-bit unsigned integer and must ensure all ''id'' values are distinct. Collisions modulo ''n'' are impossible under this constraint.
 * Encodings used elsewhere in this spec:
-** ''ser_id(id) = bytes(4, id)'' (4-byte big-endian).
+** ''ser_id(id) = bytes(4, id)'' (4-byte big-endian), defined only for <math>0 \le id \le 2^{32}-1</math>.
 ** ''ser_ids(id<sub>1</sub>,…,id<sub>u</sub>) = ser_id(id<sub>1</sub>) || … || ser_id(id<sub>u</sub>)'' where ''id<sub>1</sub>,…,id<sub>u</sub>'' are the IDs sorted in ascending order.
 ** The x-only encoding of a public key is ''xbytes(P)'' (32 bytes). This is what Taproot/BIP340 uses on chain.
 * Failure handling:
 ** ''Fail'' means the algorithm aborts without output. When appropriate (e.g., in verification procedures), the failing party may be blamed as specified by the algorithm.
-* Security notes:
-** Nonces must be unique per signature and uniformly distributed; reuse across messages leaks the secret share.
-** Any scalar derived from hash output (e.g., tweak scalars) must be reduced mod ''n''; if the algorithm requires nonzero, the value ''0'' must be rejected.
-** Scalar/point operations should be constant-time; secret scalars should be zeroized after use.
-** When an algorithm refers to the ''even-Y'' convention (''with_even_y''), this is to maintain BIP340 compatibility for challenges and X-only keys.
-** Signers should verify their own partial signature locally before publishing (recommended self-check).
-* Tags used in this document (domain separation):
-** ''"FROST/aux"'', ''"FROST/nonce"'', ''"FROST/noncecoef"'', ''"TapTweak"'', ''"BIP0340/challenge"''.
+* Security notes (key generation scope):
+** Scalar and point operations should be constant-time; secret scalars should be zeroized after use.
+** All hash-derived scalars (e.g. TapTweak) are interpreted as integers and reduced mod ''n''.
+** Even-Y convention is applied to align with BIP340/BIP341 x-only keys.
+* Tagged hashes used in this document:
+** "TapTweak" (as specified in BIP341).
 
 === Key Generation Algorithms ===
 
-This procedure generates ''t-of-N'' threshold shares of a ''tweaked'' group secret, while publishing ''VSS'' commitments to the ''untweaked'' polynomial. Each signer verifies its share against those commitments ''plus'' the public x-only tweak ''t = hash_TapTweak(xbytes(A<sub>0</sub>))'' derived from the first commitment.
+This procedure generates ''t-of-N'' threshold shares of a ''tweaked'' group secret, while publishing ''VSS'' commitments to the ''untweaked'' polynomial. Each signer verifies its share against those commitments ''plus'' the public x-only tweak
+<math>\text{tweak} = \text{int}(\text{hash}_{\text{TapTweak}}(\text{xbytes}(A_0)\|\| \operatorname{empty\_bytestring})) \bmod n</math>
+derived from the first commitment.
 
 ==== Objects and encodings ====
-* ''vss_commitment = a tuple (A<sub>0</sub>, …, A<sub>t-1</sub>) of curve points, each given as a 33-byte SEC compressed encoding (cbytes). Here A<sub>k</sub> = a<sub>k</sub> · G for the dealer's chosen coefficients.
-* ''secshare<sub>i</sub> = a 32-byte scalar, equal to bytes(32, d<sub>i</sub>), representing signer i's secret tweaked share.
-* ''pubshare<sub>i</sub> = a 33-byte compressed point P<sub>i</sub><sup>Q</sup> = cbytes(P<sub>i</sub><sup>Q</sup>), representing signer i's public tweaked share.
-* ''grouppk_xonly (derived, not published)'' = a 32-byte x-only public key = xbytes(Q), representing the threshold group public key usable in Taproot.
 
-Identifier set: ''id<sub>i</sub> = i'' for ''i ∈ {1,…,N}''. All IDs must be distinct and publicly known.
+* ''vss_commitment'' = a tuple <math>(\operatorname{cbytes\_ext}(A_0), \dots, \operatorname{cbytes\_ext}(A_{t-1}))</math> of 33-byte encodings. Here <math>A_k = a_k \cdot G</math> for the dealer's chosen coefficients.
+** Note: coefficients <math>a_k</math> for <math>1 \le k \le t-2</math> are sampled from <math>[0..n-1]</math> and may be zero (so <math>A_k</math> may be infinity). If <math>t>1</math>, the dealer samples <math>a_{t-1} \in [1..n-1]</math>, so <math>A_{t-1}</math> is never infinity.
+* ''secshare<sub>i</sub>'' = a 32-byte big-endian encoding <math>\text{bytes}(32,d_i)</math> of an integer <math>d_i</math> with <math>1 \le d_i \le n-1</math>.  Parsers MUST reject encodings with <math>d_i=0</math> or <math>d_i \ge n</math> (no modular reduction on parse).
+* ''pubshare<sub>i</sub>'' = a 33-byte compressed point <math>P_i^Q = \text{cbytes}(P_i^Q)</math>, representing signer <math>i</math>'s public tweaked share.
+* ''grouppk_xonly (derived, not published)'' = a 32-byte x-only public key <math>= \text{xbytes}(Q)</math>, representing the threshold group public key usable in Taproot.
+
+Identifier set: ''id<sub>i</sub> = i'' for <math>i \in \{1, \dots, N\}</math>. All IDs must be distinct and publicly known.
 
 The algorithms below are specified with an emphasis on clarity rather than optimality. Different implementations that produce identical outputs and verifications are acceptable.
 
 <div>
 Algorithm ''TrustedDealerKeygen(N, t)'':
 * Inputs:
-** ''N'': number of participants (integer, ''1 &lt; N &lt; 2<sup>32</sup>'').
-** ''t'' (integer, ''1 &leq; t &leq; N'').
-* Procedure
-*# Sample untweaked polynomial coefficients:
-*#* Choose a random scalar a<sub>0</sub> in [1 .. n-1].
-*#* For k = 1 to t-1, choose a<sub>k</sub> uniformly at random in [0 .. n-1].
-*#* Define the polynomial f(X) = a<sub>0</sub> + a<sub>1</sub>·X + … + a<sub>t-1</sub>·X<sup>t-1</sup> (mod n).
-*# Commitments to untweaked polynomial:
-*#* For each k = 0 … t-1, compute the commitment point A<sub>k</sub> = a<sub>k</sub> · G.
-*#* Let vss_commitment = (A<sub>0</sub>, A<sub>1</sub>, …, A<sub>t-1</sub>) (each A<sub>k</sub> represented as 33-byte compressed).
-*# Derive the public x-only tweak:
-*#* Let P = A<sub>0</sub> (the initial commitment point).
-*#* Compute tweak = int(hash_TapTweak(xbytes(P) || 0<sup>32</sup>)) mod n (the TapTweak hash of P's x-coordinate and an all-zero Merkle root).
-*#* Let g = 1 if has_even_y(P), otherwise let g = n - 1 (which is ≡ -1 mod n). (Thus g ≡ ±1 (mod n) represents a parity flip if needed.)
-*#* Compute the tweaked group key point Q = g · P + tweak · G. Fail if is_infinite(Q).
-*# Compute shares for each participant i = 1 .. N:
-*#* Let id = i.
-*#* Compute the public committed evaluation at id: E = A<sub>0</sub> + id · A<sub>1</sub> + … + id<sup>t-1</sup> · A<sub>t-1</sub>. (All scalar multiplications and additions are mod n and on the curve.)
-*#* Compute signer i's public tweaked share point: P<sub>i</sub><sup>Q</sup> = g · E + tweak · G.
-*#* Compute signer i's secret tweaked share (scalar): d<sub>i</sub> = (g · f(id) + tweak) mod n. (Note: f(id) = a<sub>0</sub> + a<sub>1</sub>·id + … + a<sub>t-1</sub>·id<sup>t-1</sup> mod n is the untweaked secret share before adding the tweak.)
-*#* Serialize the outputs for participant i:
-*#** secshare<sub>i</sub> = bytes(32, d<sub>i</sub>) (32-byte scalar)
-*#** pubshare<sub>i</sub> = cbytes(P<sub>i</sub><sup>Q</sup>) (33-byte compressed point)
-*# Publish outputs:
-*#* Publish vss_commitment, the parameters (N, t), and the list of participant identifiers (1, 2, …, N).
-*# Deliver shares privately:
-*#* Send each participant i their personal tuple (id<sub>i</sub> = i, secshare<sub>i</sub>). (Optionally, the dealer may also provide pubshare<sub>i</sub> to each participant, although each can recompute it.)
-** Output:
-*** The dealer outputs (vss_commitment, { (id<sub>i</sub>, secshare<sub>i</sub>) }<sub>i=1..N</sub>). Each participant receives their ID and secret share, and derives ''grouppk_xonly = xbytes(Q)'' locally from ''A<sub>0</sub>'' via {{mono|GroupPubkeyFromCommitment}}.
-</div>
-
-Properties: For every ''i'', their tweaked share satisfies ''d<sub>i</sub>⋅G = P<sub>i</sub><sup>Q</sup>''. The derived group key Q equals the x-only Taproot tweak of A<sub>0</sub> as defined above.
-
-<div>
-Algorithm: ComputePubshare(id, vss_commitment):
-* Inputs:
-** id: a participant identifier (positive integer)
-** vss_commitment: tuple (A<sub>0</sub>, …, A<sub>t-1</sub>)
+** ''N'': number of participants (integer, ''1 < N < 2<sup>32</sup>'').
+** ''t'': threshold parameter (integer, ''1 ≤ t ≤ N'').
 * Procedure:
-*# Compute the curve point E = A<sub>0</sub> + id · A<sub>1</sub> + … + id<sup>t-1</sup> · A<sub>t-1</sub>. (All arithmetic mod n.)
-*# Return E.
-(This is the public commitment corresponding to evaluating the hidden polynomial at X = id.)
+*# Sample untweaked polynomial coefficients:
+*#* Choose a random scalar ''a<sub>0</sub>'' in ''[1 .. n-1]''.
+*#* If <math>t = 1</math>, skip this step (the polynomial is constant).
+*#* If <math>t > 1</math>:
+*#** For ''k = 1'' to ''t-2'', choose ''a<sub>k</sub>'' uniformly at random in ''[0 .. n-1]''.
+*#** Choose ''a<sub>t-1</sub>'' uniformly at random in ''[1 .. n-1]'' (MUST be nonzero) to ensure <math>\deg(f)=t-1</math>.
+*#* Define the polynomial <math>f(X) = a_0 + a_1 \cdot X + \dots + a_{t-1} \cdot X^{t-1} \pmod n.</math>
+*# Commitments to untweaked polynomial:
+*#* For each ''k = 0 … t-1'', compute the commitment point ''A<sub>k</sub> = a<sub>k</sub> · G''.
+*#* Let ''vss_commitment'' = <math>(\operatorname{cbytes\_ext}(A_0), \operatorname{cbytes\_ext}(A_1), \dots, \operatorname{cbytes\_ext}(A_{t-1}))</math>.
+*# Derive the public x-only tweak:
+*#* Let ''P = A<sub>0</sub>'' (the initial commitment point).
+*#* Fail if ''is_infinite(P)''.
+*#* Compute <math>\text{tweak} = \text{int}(\text{hash}_{\text{TapTweak}}(\text{xbytes}(P) \|\| \operatorname{empty\_bytestring})) \bmod n,</math> i.e. TapTweak of the x-only internal key and an ''empty'' Merkle root (empty bytestring, per BIP341 when there is no script path).
+*#* Let ''g = 1'' if ''has_even_y(P)'', otherwise let ''g = n − 1'' (which is ≡ −1 mod ''n''). Thus ''g ≡ ±1 (mod n)'' represents a parity flip if needed.
+*#* Compute the Taproot output key point (pre-even-y) <math>Q_{\text{out}} = g \cdot P + \text{tweak} \cdot G.</math> Fail if ''is_infinite(Q<sub>out</sub>)''.
+*#* Let <math>g_Q = 1</math> if <math>\operatorname{has\_even\_y}(Q_{\text{out}})</math>, else let <math>g_Q = n - 1</math>.
+*#* Set <math>Q \leftarrow g_Q \cdot Q_{\text{out}}</math>. (Now <math>Q</math> has even <math>y</math>; <math>\text{xbytes}(Q)=\text{xbytes}(Q_{\text{out}})</math>.)
+*#* Note: recipients derive the x-only Taproot output key as <math>\text{xbytes}(Q)</math>. The full point <math>Q</math> (even-y) is used only for BIP340 signing semantics.
+*# Pre-tweak the dealer polynomial once (equivalent form):
+*#* Let <math>q = (g_Q \cdot (g \cdot a_0 + \text{tweak})) \bmod n</math>.
+*#* For ''k = 1 … t-1'', let <math>b_k = (g_Q \cdot (g \cdot a_k)) \bmod n</math>.
+*#* Define <math>h(X) = q + b_1 \cdot X + \dots + b_{t-1} \cdot X^{t-1} \pmod n.</math>
+*# Compute shares for each participant ''i = 1 … N'':
+*#* Let ''id = i''.
+*#* Compute signer ''i'''s secret tweaked share <math>d_i = h(\text{id}) = q + \sum_{k=1}^{t-1} b_k \cdot \text{id}^k \pmod n.</math> Fail if <math>d_i = 0</math>.
+*#* Compute signer ''i'''s public tweaked share point <math>P_i^Q = d_i \cdot G.</math>
+*#* (Optional check) Let <math>E = A_0 + \text{id} \cdot A_1 + \dots + \text{id}^{t-1} \cdot A_{t-1}.</math>
+*#* Check <math>P_i^Q = g_Q \cdot (g \cdot E + \text{tweak} \cdot G).</math> (Equivalently, <math>P_i^Q = \operatorname{with\_even\_y}(g\cdot E + \text{tweak}\cdot G)</math> with the same <math>g_Q</math> derived from <math>Q_{\text{out}}</math>.)
+*#* Serialize the outputs for participant ''i'':
+*#** ''secshare<sub>i</sub> = bytes(32, d<sub>i</sub>)'' (32-byte scalar).
+*#** ''pubshare<sub>i</sub> = cbytes(P<sub>i</sub><sup>Q</sup>)'' (33-byte compressed point).
+*# Publish outputs:
+*#* Publish ''vss_commitment'', the parameters ''(N, t)'', and the list of participant identifiers ''(1, 2, …, N)''.
+*# Deliver shares privately:
+*#* Send each participant ''i'' their personal tuple ''(id<sub>i</sub> = i, secshare<sub>i</sub>)''. Optionally, the dealer may also provide ''pubshare<sub>i</sub>'', although each participant can recompute it.
+* Output:
+** The dealer outputs ''(vss_commitment, { (id<sub>i</sub>, secshare<sub>i</sub>) }<sub>i=1..N</sub>)''. Each participant receives their ID and secret share, and derives ''grouppk_xonly = xbytes(Q)'' locally from ''A<sub>0</sub>'' via {{mono|GroupPubkeyFromCommitment}}.
+</div>
+
+Properties: For every ''i'', their tweaked share satisfies ''d<sub>i</sub> · G = P<sub>i</sub><sup>Q</sup>''. The derived group key ''Q'' equals the x-only Taproot tweak of ''A<sub>0</sub>'' as defined above.
+
+<div>
+Algorithm: ''ComputeCommittedPoint(id, vss_commitment)''
+* Inputs:
+** ''id'': a participant identifier (positive integer).
+** ''vss_commitment'': tuple <math>(A_0, \dots, A_{t-1})</math>.
+* Procedure:
+*# Let <math>t = \operatorname{len}(\operatorname{vss\_commitment})</math>.
+*# For <math>k=0 \dots t-1</math>, parse <math>A_k = \operatorname{cpoint\_ext}(\operatorname{vss\_commitment}[k])</math>. Fail if parsing fails.
+*# Compute the curve point <math>E = A_0 + \text{id} \cdot A_1 + \dots + \text{id}^{t-1} \cdot A_{t-1}.</math>
+*# Return <math>E</math> (committed evaluation point).
 </div>
 
 <div>
-Algorithm: VerifyShare(id, secshare, vss_commitment):
+Algorithm: ''ComputeTweakedPubshare(id, vss_commitment)''
 * Inputs:
-** id: participant identifier (int id &in; {1,…,N})
-** secshare: 32-byte secret share (tweaked scalar share for participant id)
-** vss_commitment: (A<sub>0</sub>, …, A<sub>t-1</sub>) commitments tuple
+** ''id'': a participant identifier (positive integer).
+** ''vss_commitment'': tuple <math>(A_0, \dots, A_{t-1})</math>.
+* Procedure:
+*# Let <math>E = \text{ComputeCommittedPoint}(\text{id}, \operatorname{vss\_commitment})</math>.
+*# Parse <math>A_0 = \operatorname{cpoint\_ext}(\operatorname{vss\_commitment}[0])</math>. Fail if parsing fails.
+*# Let <math>P = A_0</math>; recompute <math>(\text{tweak}, g)</math> from <math>P</math> as in key generation.
+*# Compute <math>Q_{\text{out}} = g \cdot A_0 + \text{tweak} \cdot G</math> and <math>g_Q</math> as in key generation.
+*# Return <math>P^Q = g_Q \cdot (g \cdot E + \text{tweak} \cdot G).</math>
+</div>
+
+<div>
+Algorithm: ''VerifyShare(id, secshare, vss_commitment)''
+* Inputs:
+** ''id'': participant identifier (integer <math>\in \{1,\dots,N\}</math>).
+** ''secshare'': 32-byte secret share (tweaked scalar share for participant ''id'').
+** ''vss_commitment'': tuple <math>(A_0, \dots, A_{t-1})</math> of commitments.
 * Procedure:
 *# Parse and check values:
-*#* Let d = int(secshare). Fail if d = 0 or d ≥ n (share is out of range or zero).
-*#* Let P = A<sub>0</sub>. Fail if is_infinite(P) (an invalid commitment).
+*#* Let <math>d = \text{int}(\text{secshare})</math>. Fail if <math>d = 0</math> or <math>d \ge n</math> (share is out of range or zero).
+*#* Parse <math>A_0 = \operatorname{cpoint\_ext}(\operatorname{vss\_commitment}[0])</math>. Fail if parsing fails.
+*#* Let <math>P = A_0</math>. Fail if <math>\operatorname{is\_infinite}(P)</math>.
 *# Recompute tweak and parity:
-*#* Compute tweak = int(hash_TapTweak(xbytes(P) || 0<sup>32</sup>)) mod n.
-*#* Let g = 1 if has_even_y(P), else g = n - 1.
+*#* Compute <math>\text{tweak} = \text{int}(\text{hash}_{\text{TapTweak}}(\text{xbytes}(P) \|\| \operatorname{empty\_bytestring})) \bmod n.</math>
+*#* Let <math>g = 1</math> if <math>\operatorname{has\_even\_y}(P)</math>, else let <math>g = n - 1</math>.
 *# Recompute expected public share:
-*#* Compute E = ComputePubshare(id, vss_commitment) (the committed point for this id).
-*#* Compute P<sup>Q</sup> = g · E + tweak · G.
-*# Verify: 
-*#* Accept the share if and only if d · G = P<sup>Q</sup>. If this equality fails, reject the share (the dealer is faulty or the share was corrupted).
+*#* Compute <math>P^Q = \text{ComputeTweakedPubshare}(\text{id}, \operatorname{vss\_commitment})</math>.
+*# Verify:
+*#* Accept the share if and only if <math>d \cdot G = P^Q.</math> If this equality fails, reject the share (the dealer is faulty or the share was corrupted).
 </div>
 
 <div>
-Algorithm: GroupPubkeyFromCommitment(vss_commitment):
+Algorithm: ''GroupPubkeyFromCommitment(vss_commitment)''
 * Input:
-** vss_commitment = (A<sub>0</sub>, …, A<sub>t-1</sub>)
+** ''vss_commitment'': tuple <math>(A_0, \dots, A_{t-1})</math>.
 * Procedure:
-*# Let P = A<sub>0</sub>.
-*# Compute tweak = int(hash_TapTweak(xbytes(P) || 0<sup>32</sup>)) mod n.
-*# Let g = 1 if has_even_y(P), else g = n - 1.
-*# Compute Q = g · P + tweak · G. Fail if is_infinite(Q).
-*# Return Q (and/or xbytes(Q)) for local use; this is a derived value and is not a published artifact of key generation.
+*# Parse <math>A_0 = \operatorname{cpoint\_ext}(\operatorname{vss\_commitment}[0])</math>. Fail if parsing fails.
+*# Let <math>P = A_0</math>.
+*# Compute <math>\text{tweak} = \text{int}(\text{hash}_{\text{TapTweak}}(\text{xbytes}(P) \|\| \operatorname{empty\_bytestring})) \bmod n.</math>
+*# Let <math>g = 1</math> if <math>\operatorname{has\_even\_y}(P)</math>, else let <math>g = n - 1</math>.
+*# Compute <math>Q_{\text{out}} = g \cdot P + \text{tweak} \cdot G.</math> Fail if <math>\operatorname{is\_infinite}(Q_{\text{out}})</math>.
+*# Let <math>g_Q = 1</math> if <math>\operatorname{has\_even\_y}(Q_{\text{out}})</math>, else let <math>g_Q = n - 1</math>.
+*# Set <math>Q \leftarrow g_Q \cdot Q_{\text{out}}</math>.
+*# Return <math>Q</math> (even-y full point for BIP340 signing semantics) and/or <math>\text{xbytes}(Q)</math> (x-only Taproot output key). Note <math>\text{xbytes}(Q)=\text{xbytes}(Q_{\text{out}})</math>.
 </div>
 
 <div>
-Internal Algorithm: Lagrange(id<sub>1</sub>…id<sub>u</sub>, id):
+Internal Algorithm: ''Lagrange(id<sub>1</sub> … id<sub>u</sub>, id)''
 * Inputs:
-** Distinct identifiers id<sub>1</sub>, …, id<sub>u</sub> (integers), with u ≥ 1.
-** id: the target identifier (must equal one of the above ids).
+** Distinct identifiers ''id<sub>1</sub>, …, id<sub>u</sub>'' (integers), with <math>u \ge 1</math>.
+** ''id'': the target identifier (must equal one of the above identifiers).
 * Procedure:
-*# Fail if any of id<sub>1</sub>…id<sub>u</sub> are repeated (all must be unique).
-*# Initialize num = 1 and denom = 1 (in mod n arithmetic).
-*# For each j from 1 to u, with id<sub>j</sub> ≠ id:
-*#* num = (num · id<sub>j</sub>) mod n
-*#* denom = (denom · (id<sub>j</sub> - id)) mod n
-*# Compute λ = num · modinv(denom) mod n.
-*# Return λ.
-(This computes the Lagrange interpolation coefficient λ for the share with identifier = id, for evaluating a polynomial at X=0.)
+*# Fail if any of ''id<sub>1</sub> … id<sub>u</sub>'' are repeated (all must be unique).
+*# Initialize <math>\text{num} = 1</math> and <math>\text{denom} = 1</math> (in modulo <math>n</math> arithmetic).
+*# For each <math>j</math> from <math>1</math> to <math>u</math>, with <math>\text{id}_j \ne \text{id}</math>:
+*#* Update <math>\text{num} = (\text{num} \cdot \text{id}_j) \bmod n</math>.
+*#* Update <math>\text{denom} = (\text{denom} \cdot (\text{id}_j - \text{id})) \bmod n</math>.
+*# Compute <math>\lambda = \text{num} \cdot \operatorname{modinv}(\text{denom}) \bmod n.</math>
+*# Return <math>\lambda</math>. 
+(This computes the Lagrange interpolation coefficient <math>\lambda</math> for the share with identifier = ''id'', for evaluating a polynomial at <math>X = 0</math>.)
 </div>
 
 <div>
-Algorithm: GroupPubFromShares(id<sub>1</sub>…id<sub>u</sub>, pubshare<sub>1</sub>…pubshare<sub>u</sub>):
+Algorithm: ''GroupPubFromShares(id<sub>1</sub> … id<sub>u</sub>, pubshare<sub>1</sub> … pubshare<sub>u</sub>)''
 * Inputs:
-** Distinct identifiers id<sub>1</sub>, …, id<sub>u</sub> with u ≥ t.
-** Corresponding tweaked public shares pubshare<sub>1</sub>, …, pubshare<sub>u</sub> (each a 33-byte compressed point).
+** Distinct identifiers ''id<sub>1</sub>, …, id<sub>u</sub>'' with <math>u \ge t</math>.
+** Corresponding tweaked public shares ''pubshare<sub>1</sub>, …, pubshare<sub>u</sub>'' (each a 33-byte compressed point).
 * Procedure:
-*# For each i = 1…u: parse pubshare<sub>i</sub> to a point P<sub>i</sub> = cpoint(pubshare<sub>i</sub>). Fail if any parsing fails or any P<sub>i</sub> is infinity.
-*# Initialize Q = (point at infinity).
-*# For each i = 1…u:
-*#* Compute λ<sub>i</sub> = Lagrange(id<sub>1</sub>…id<sub>u</sub>, id<sub>i</sub>).
-*# Set Q = Q + λ<sub>i</sub> · P<sub>i</sub>.
-*# Fail if is_infinite(Q).
-*# Return cbytes(Q) (the 33-byte compressed encoding of the recovered group key point).
-(Any subset of ≥ t valid tweaked pubshares can be combined by Lagrange interpolation to recover the group public key Q. See below.)
+*# For each <math>i = 1 \dots u</math>:
+*#* Parse ''pubshare<sub>i</sub>'' to a point <math>P_i = \operatorname{cpoint}(\text{pubshare}_i)</math>. Fail if any parsing fails or any <math>P_i</math> is infinity.
+*# Initialize <math>Q</math> to the point at infinity.
+*# For each <math>i = 1 \dots u</math>:
+*#* Compute <math>\lambda_i = \text{Lagrange}(id_1, \dots, id_u, id_i).</math>
+*#* Update <math>Q = Q + \lambda_i \cdot P_i.</math>
+*# Fail if <math>\operatorname{is\_infinite}(Q)</math>.
+*# Return <math>\operatorname{cbytes}(Q)</math> (the 33-byte compressed encoding of the recovered group key point). 
+(Any subset of at least <math>t</math> valid tweaked public shares can be combined by Lagrange interpolation to recover the group public key <math>Q</math>. See below.)
 </div>
-
-
-=== Why this works ===
-
-This section explains why the algorithms above:
-* each participant's tweaked share is consistent with the public VSS commitments, and  
-* any subset of at least <math>t</math> tweaked public shares reconstructs the same group public key <math>Q</math>,  
-* while fewer than <math>t</math> shares do not determine the underlying scalar <math>a_0</math>.
-
-Let:
-* <math>n</math> be the order of the elliptic-curve group with base point <math>G</math>.
-* The Shamir secret-sharing polynomial be <math>f(X) = a_0 + a_1 X + \dots + a_{t-1} X^{t-1} \pmod n,</math> with coefficients <math>a_i \in [1, n-1]</math>.
-* The commitment points be <math>A_k = a_k \cdot G, \quad k = 0, \dots, t-1,</math> so in particular <math>A_0 = a_0 \cdot G</math>.
-* The point <math>P</math> be defined as <math>P = A_0</math>.
-* The tweak scalar be <math>\text{tweak} = \operatorname{int}(\operatorname{hash\_TapTweak}(\operatorname{xbytes}(P) \,\Vert\, 0^{32})) \bmod n.</math>
-* The parity scalar <math>g \in \{1, n-1\}</math> be defined as: <math>g =\begin{cases}
-  1, & \text{if } P \text{ has even } y\text{-coordinate},\\
-  n-1, & \text{otherwise}.
-  \end{cases}</math>
-
-The group public key is <math>Q = g \cdot P + \text{tweak} \cdot G
-  = g \cdot A_0 + \text{tweak} \cdot G
-  = g \cdot (a_0 \cdot G) + \text{tweak} \cdot G.</math>
-
-For participant <math>i \in \{1, \dots, N\}</math> with identifier <math>\operatorname{id}_i = i</math>, the (untweaked) scalar Shamir share is <math>f(\operatorname{id}_i) = a_0 + a_1 \operatorname{id}_i + \dots + a_{t-1} \operatorname{id}_i^{t-1} \pmod n.</math>
-
-The corresponding commitment point is
-
-<math>
-\begin{aligned}
-E_i
-&= A_0 + \operatorname{id}_i A_1 + \dots + \operatorname{id}_i^{t-1} A_{t-1} \\
-&= (a_0 + a_1 \operatorname{id}_i + \dots + a_{t-1} \operatorname{id}_i^{t-1}) \cdot G \\
-&= f(\operatorname{id}_i) \cdot G.
-\end{aligned}
-</math>
-
-The tweaked scalar share and tweaked public share point are <math>d_i = \bigl(g \cdot f(\operatorname{id}_i) + \text{tweak}\bigr) \bmod n,
-\qquad
-P_i^{Q} = d_i \cdot G.</math>
-
-==== Share-commitment consistency ====
-
-From the definitions above,
-
-<math>
-\begin{aligned}
-P_i^{Q}
-  &= d_i \cdot G \\
-  &= \bigl(g \cdot f(\operatorname{id}_i) + \text{tweak}\bigr) \cdot G \\
-  &= g \cdot \bigl(f(\operatorname{id}_i) \cdot G\bigr) + \text{tweak} \cdot G \\
-  &= g \cdot E_i + \text{tweak} \cdot G.
-\end{aligned}
-</math>
-
-Hence, for every participant <math>i</math>, <math>d_i \cdot G = g \cdot E_i + \text{tweak} \cdot G.</math>
-
-Algorithm {{mono|VerifyShare}} recomputes <math>E_i</math> from {{mono|vss_commitment}}, recomputes <math>g</math> and <math>\text{tweak}</math> from <math>A_0</math>, and verifies that <math>d \cdot G = g \cdot E_i + \text{tweak} \cdot G.</math>
-
-Therefore, any deviation in <math>d_i</math> from the form <math>g \cdot f(\operatorname{id}_i) + \text{tweak}</math> is detected as a verification failure.
-
-==== Lagrange interpolation and reconstruction of Q ====
-
-Let <math>S \subseteq \{1, \dots, N\}</math> be a set of indices with cardinality <math>|S| = u \ge t</math>. For each <math>i \in S</math>, let <math>\operatorname{id}_i</math> denote its identifier and let <math>\lambda_i</math> be the Lagrange interpolation coefficient at <math>X = 0</math> for the points <math>\{\operatorname{id}_j\}_{j \in S}</math>, as computed by {{mono|Lagrange}}.
-
-For any polynomial <math>f</math> of degree at most <math>t-1</math>, the Lagrange coefficients satisfy:
-
-<math>
-\sum_{i \in S} \lambda_i \, f(\operatorname{id}_i) = f(0) = a_0 \pmod n,
-\qquad
-\sum_{i \in S} \lambda_i = 1 \pmod n.
-</math>
-
-Using the definition of the tweaked shares: <math>d_i = g \cdot f(\operatorname{id}_i) + \text{tweak} \pmod n,</math> one obtains:
-
-<math>
-\begin{aligned}
-\sum_{i \in S} \lambda_i \, d_i
-&= \sum_{i \in S} \lambda_i \bigl(g \cdot f(\operatorname{id}_i) + \text{tweak}\bigr) \pmod n \\
-&= g \cdot \sum_{i \in S} \lambda_i f(\operatorname{id}_i)
-   \;+\; \text{tweak} \cdot \sum_{i \in S} \lambda_i \pmod n \\
-&= g \cdot a_0 + \text{tweak} \pmod n.
-\end{aligned}
-</math>
-
-Multiplying by <math>G</math> and using <math>P_i^{Q} = d_i \cdot G</math> yields:
-
-<math>
-\begin{aligned}
-\sum_{i \in S} \lambda_i \, P_i^{Q}
-&= \sum_{i \in S} \lambda_i (d_i \cdot G) \\
-&= \bigl(g \cdot a_0 + \text{tweak}\bigr) \cdot G \\
-&= g \cdot (a_0 \cdot G) + \text{tweak} \cdot G \\
-&= g \cdot A_0 + \text{tweak} \cdot G \\
-&= Q.
-\end{aligned}
-</math>
-
-Thus, any subset of at least <math>t</math> tweaked public shares satisfies <math>\sum_{i \in S} \lambda_i \, P_i^{Q} = Q.</math>
-
-Algorithm {{mono|GroupPubFromShares}} performs this computation on the input points {{mono|pubshare₁…pubshareᵤ}} and returns the unique group key <math>Q</math> consistent with them.
-
-==== Threshold property and secrecy ====
-
-* For any subset <math>S</math> with <math>|S| \ge t</math>, the above identity shows that {{mono|GroupPubFromShares}} reconstructs the same <math>Q</math> as {{mono|GroupPubkeyFromCommitment}}.
-* For any subset <math>S</math> with <math>|S| < t</math>, the values <math>\{f(\operatorname{id}_i)\}_{i \in S}</math> do not determine <math>a_0</math>, because there exist multiple degree-<math>(t-1)</math> polynomials over <math>\mathbb{Z}_n</math> consistent with these evaluations and having different constant terms. Therefore <math>a_0</math>, and hence <math>g \cdot a_0 + \text{tweak}</math>, remain undetermined from fewer than <math>t</math> shares.
-
-The affine transformation
-
-<math>
-a_0 \mapsto g \cdot a_0 + \text{tweak} \pmod n
-</math>
-
-preserves the information-theoretic secrecy properties of Shamir secret sharing; the threshold property is unchanged by the tweak.
-
-==== Detection of dealer misbehavior ====
-
-* {{mono|VerifyShare}} ensures that for each participant, the scalar share matches the commitment to <math>f</math> and the global tweak parameters derived from <math>A_0</math>. Any incorrect or inconsistent <math>d_i</math> fails the equation
-  <math>
-  d_i \cdot G = g \cdot E_i + \text{tweak} \cdot G.
-  </math>
-* {{mono|GroupPubkeyFromCommitment}} defines a unique group key <math>Q</math> from {{mono|vss_commitment}} alone. Any qualified subset can independently derive <math>Q</math> from their tweaked pubshares via {{mono|GroupPubFromShares}} and check equality. Disagreement implies invalid shares or inconsistent commitments.
-
-Consequently, a dealer that does not follow the specified construction produces shares or commitments that fail these verifications.
-
-
-== Acknowledgments ==
-
-== Copyright ==
