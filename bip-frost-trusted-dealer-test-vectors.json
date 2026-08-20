@@ -1,0 +1,257 @@
+{
+  "description": "BIP FROST Trusted Dealer Key Generation deterministic test vectors",
+  "valid": [
+    {
+      "name": "1_of_1",
+      "comment": "Basic deterministic 1-of-1 vector.",
+      "n": 1,
+      "t": 1,
+      "initial_coefficients": [
+        "0000000000000000000000000000000000000000000000000000000000000001"
+      ],
+      "initial_commitments": [
+        "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      ],
+      "taproot_safety_tweak": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30e7",
+      "final_coefficients": [
+        "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30e8"
+      ],
+      "final_commitments": [
+        "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21"
+      ],
+      "vss_commitment": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21",
+      "thresh_pk": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21",
+      "participants": [
+        {
+          "id": 0,
+          "evaluation_point": 1,
+          "secshare": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30e8",
+          "pubshare": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21"
+        }
+      ]
+    },
+    {
+      "name": "2_of_3",
+      "comment": "Basic deterministic 2-of-3 vector.",
+      "n": 3,
+      "t": 2,
+      "initial_coefficients": [
+        "0000000000000000000000000000000000000000000000000000000000000001",
+        "0000000000000000000000000000000000000000000000000000000000000002"
+      ],
+      "initial_commitments": [
+        "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+      ],
+      "taproot_safety_tweak": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30e7",
+      "final_coefficients": [
+        "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30e8",
+        "0000000000000000000000000000000000000000000000000000000000000002"
+      ],
+      "final_commitments": [
+        "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21",
+        "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
+      ],
+      "vss_commitment": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d2102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+      "thresh_pk": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21",
+      "participants": [
+        {
+          "id": 0,
+          "evaluation_point": 1,
+          "secshare": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30ea",
+          "pubshare": "02f14de157ceb8bffde7641f27b67eb54584d4fa3b81a54ac03785035a4f4e3e30"
+        },
+        {
+          "id": 1,
+          "evaluation_point": 2,
+          "secshare": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30ec",
+          "pubshare": "0314e02518221f237b4ff842e707b2ef8ac53586b74bd87801ac64d904c311e268"
+        },
+        {
+          "id": 2,
+          "evaluation_point": 3,
+          "secshare": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30ee",
+          "pubshare": "033e22a28e0c55125b7c8a4aef6d7b0c74e40709c8be23a7c97732cd24a84eac9f"
+        }
+      ]
+    },
+    {
+      "name": "3_of_3",
+      "comment": "Basic deterministic 3-of-3 vector.",
+      "n": 3,
+      "t": 3,
+      "initial_coefficients": [
+        "0000000000000000000000000000000000000000000000000000000000000003",
+        "0000000000000000000000000000000000000000000000000000000000000005",
+        "0000000000000000000000000000000000000000000000000000000000000007"
+      ],
+      "initial_commitments": [
+        "02f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
+        "022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc"
+      ],
+      "taproot_safety_tweak": "965a70e32ca36371d64d9942813b6e96e42498e4483c319cd4316cbc53485c82",
+      "final_coefficients": [
+        "965a70e32ca36371d64d9942813b6e96e42498e4483c319cd4316cbc53485c85",
+        "0000000000000000000000000000000000000000000000000000000000000005",
+        "0000000000000000000000000000000000000000000000000000000000000007"
+      ],
+      "final_commitments": [
+        "02418c46636d9e1a683f58e35b42336e776fdcc3b2d4e39e7a0bf1ab0716e3c5fa",
+        "022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc"
+      ],
+      "vss_commitment": "02418c46636d9e1a683f58e35b42336e776fdcc3b2d4e39e7a0bf1ab0716e3c5fa022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc",
+      "thresh_pk": "02418c46636d9e1a683f58e35b42336e776fdcc3b2d4e39e7a0bf1ab0716e3c5fa",
+      "participants": [
+        {
+          "id": 0,
+          "evaluation_point": 1,
+          "secshare": "965a70e32ca36371d64d9942813b6e96e42498e4483c319cd4316cbc53485c91",
+          "pubshare": "025cdc0093da36abae04055c6cbf4f6d8c42975b3d2301f1578a43d06d6812cf90"
+        },
+        {
+          "id": 1,
+          "evaluation_point": 2,
+          "secshare": "965a70e32ca36371d64d9942813b6e96e42498e4483c319cd4316cbc53485cab",
+          "pubshare": "037c22c9207669475a35cd9acc9a42eb67ce2555d4ae44edacecac0e631ad6e46f"
+        },
+        {
+          "id": 2,
+          "evaluation_point": 3,
+          "secshare": "965a70e32ca36371d64d9942813b6e96e42498e4483c319cd4316cbc53485cd3",
+          "pubshare": "03b971dc84bb9a7b0fabe183b926332aac396694e5336fe703eb4cf5d8fb19a5c4"
+        }
+      ]
+    },
+    {
+      "name": "zero_nonconstant_coefficient",
+      "comment": "A zero nonconstant coefficient produces an infinity nonconstant Feldman commitment.",
+      "n": 3,
+      "t": 2,
+      "initial_coefficients": [
+        "0000000000000000000000000000000000000000000000000000000000000007",
+        "0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "initial_commitments": [
+        "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc",
+        "000000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "taproot_safety_tweak": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3aef",
+      "final_coefficients": [
+        "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3af6",
+        "0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "final_commitments": [
+        "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3",
+        "000000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "vss_commitment": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3000000000000000000000000000000000000000000000000000000000000000000",
+      "thresh_pk": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3",
+      "participants": [
+        {
+          "id": 0,
+          "evaluation_point": 1,
+          "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3af6",
+          "pubshare": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3"
+        },
+        {
+          "id": 1,
+          "evaluation_point": 2,
+          "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3af6",
+          "pubshare": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3"
+        },
+        {
+          "id": 2,
+          "evaluation_point": 3,
+          "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3af6",
+          "pubshare": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3"
+        }
+      ]
+    },
+    {
+      "name": "zero_initial_share",
+      "comment": "Participant 0 has an initial zero share, but the final share is nonzero after Taproot safety.",
+      "n": 2,
+      "t": 2,
+      "initial_coefficients": [
+        "000000000000000000000000000000000000000000000000000000000000001d",
+        "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364124"
+      ],
+      "initial_commitments": [
+        "02c44d12c7065d812e8acf28d7cbb19f9011ecd9e9fdf281b0e6a3b5e87d22e7db",
+        "03c44d12c7065d812e8acf28d7cbb19f9011ecd9e9fdf281b0e6a3b5e87d22e7db"
+      ],
+      "taproot_safety_tweak": "c43aa178b5abfdc051ba7b83e0a1616b99a8a0f91f4a68a5b48ec3a4fd73d3fd",
+      "final_coefficients": [
+        "c43aa178b5abfdc051ba7b83e0a1616b99a8a0f91f4a68a5b48ec3a4fd73d41a",
+        "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364124"
+      ],
+      "final_commitments": [
+        "0315cb9414c636c5a4158390ad76c3f66629c3b32d268ccddf3c603834c69b5762",
+        "03c44d12c7065d812e8acf28d7cbb19f9011ecd9e9fdf281b0e6a3b5e87d22e7db"
+      ],
+      "vss_commitment": "0315cb9414c636c5a4158390ad76c3f66629c3b32d268ccddf3c603834c69b576203c44d12c7065d812e8acf28d7cbb19f9011ecd9e9fdf281b0e6a3b5e87d22e7db",
+      "thresh_pk": "0315cb9414c636c5a4158390ad76c3f66629c3b32d268ccddf3c603834c69b5762",
+      "participants": [
+        {
+          "id": 0,
+          "evaluation_point": 1,
+          "secshare": "c43aa178b5abfdc051ba7b83e0a1616b99a8a0f91f4a68a5b48ec3a4fd73d3fd",
+          "pubshare": "0206e2fb3a256c4ff5aafa0b39eaf30944df0351e6811327a355fccd3a72abd943"
+        },
+        {
+          "id": 1,
+          "evaluation_point": 2,
+          "secshare": "c43aa178b5abfdc051ba7b83e0a1616b99a8a0f91f4a68a5b48ec3a4fd73d3e0",
+          "pubshare": "03791acba4ec327e4ec20cd8a5f366a2e68a20bcc148858cc9e01ded1b2e2af82d"
+        }
+      ]
+    }
+  ],
+  "invalid": [
+    {
+      "name": "zero_imported_secret",
+      "comment": "Imported threshold secret is zero.",
+      "n": 3,
+      "t": 2,
+      "seckey": "0000000000000000000000000000000000000000000000000000000000000000",
+      "expected_failure": "invalid_seckey"
+    },
+    {
+      "name": "seckey_equal_to_group_order",
+      "comment": "Imported threshold secret is equal to the secp256k1 group order.",
+      "n": 3,
+      "t": 2,
+      "seckey": "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141",
+      "expected_failure": "invalid_seckey"
+    },
+    {
+      "name": "malformed_vss_length",
+      "comment": "VSS commitment length is not exactly 33*t bytes.",
+      "n": 3,
+      "t": 2,
+      "vss_commitment": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "expected_failure": "invalid_vss_commitment"
+    },
+    {
+      "name": "infinity_constant_commitment",
+      "comment": "The constant-term VSS commitment is infinity.",
+      "n": 3,
+      "t": 2,
+      "vss_commitment": "0000000000000000000000000000000000000000000000000000000000000000000279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+      "expected_failure": "invalid_vss_commitment"
+    },
+    {
+      "name": "zero_final_share",
+      "comment": "Final secret share for participant 0 is zero after the Taproot-safety transformation.",
+      "n": 2,
+      "t": 2,
+      "initial_coefficients": [
+        "0000000000000000000000000000000000000000000000000000000000000011",
+        "fffd80913cb1712fa40a17cd2cd5a59272e981c4b9f37935e6a4e7935428465c"
+      ],
+      "expected_failure": "zero_final_share"
+    }
+  ]
+}
