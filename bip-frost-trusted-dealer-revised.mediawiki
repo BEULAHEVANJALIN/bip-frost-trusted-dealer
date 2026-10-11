@@ -45,7 +45,7 @@ This proposal does not define signing, nonce generation, share refresh or repair
 
 === Parameters and Outputs ===
 
-Key generation takes a participant count ''n'', a threshold ''t'', and optionally an initial secret ''seckey''. The parameters MUST satisfy ''1 ≤ t ≤ n < 2<sup>32</sup>''. BIP 445 use is additionally subject to the limits in [[#Use with BIP 445|Use with BIP 445]].
+Key generation takes a participant count ''n'', a threshold ''t'', and optionally an initial secret ''seckey''. The parameters MUST satisfy ''1 ≤ t ≤ n ≤ 128'', matching [https://github.com/siv2r/bip-frost-signing BIP 445].
 
 Participant identifiers are the integers ''id = 0, ..., n - 1''. Participant ''id'' has the nonzero Shamir evaluation point ''x<sub>id</sub> = id + 1''. Implementations MUST NOT use ''id'' itself as the evaluation point or renumber participants when selecting a signing set.
 
@@ -144,7 +144,7 @@ PolynomialEvaluatePoint(commitments, x):
     return result
 
 ParticipantEvaluationPoint(id, n):
-    fail unless 1 <= n < 2^32
+    fail unless 1 <= n <= 128
     fail unless 0 <= id < n
     return Scalar(id + 1)
 </pre>
@@ -206,6 +206,7 @@ The final VSS commitment is authoritative. The threshold point is ''B<sub>0</sub
 
 <pre>
 DerivePubshareFromCommitment(id, n, t, vss_commitment):
+    fail unless 1 <= t <= n <= 128
     x = ParticipantEvaluationPoint(id, n)
     commitments = ParseVSSCommitment(vss_commitment, t)
     fail if either operation fails
@@ -219,6 +220,7 @@ ThreshPubkeyFromCommitment(t, vss_commitment):
     return cbytes(commitments[0])
 
 VerifySecshare(id, n, t, secshare, vss_commitment):
+    return False unless 1 <= t <= n <= 128
     d = scalar_from_bytes_nonzero_checked(secshare)
     x = ParticipantEvaluationPoint(id, n)
     commitments = ParseVSSCommitment(vss_commitment, t)
@@ -226,7 +228,7 @@ VerifySecshare(id, n, t, secshare, vss_commitment):
     return d * G = PolynomialEvaluatePoint(commitments, x)
 </pre>
 
-Verification compares group elements. Since ''d'' is nonzero, an infinity expected point fails verification without needing to serialize it. These helpers do not establish transport authentication, commitment agreement, or all ceremony-level parameter constraints; participants MUST perform the complete acceptance procedure below.
+Verification compares group elements. Since ''d'' is nonzero, an infinity expected point fails verification without needing to serialize it. Public-share derivation and secret-share verification validate ''n'' and ''t'', but these helpers do not establish transport authentication or commitment agreement; participants MUST perform the complete acceptance procedure below.
 
 === Trusted Dealer Key Generation ===
 
@@ -234,7 +236,7 @@ Verification compares group elements. Since ''d'' is nonzero, an infinity expect
 
 <pre>
 TrustedDealerKeygen(n, t, seckey=None):
-    fail unless 1 <= t <= n < 2^32
+    fail unless 1 <= t <= n <= 128
     if seckey is supplied:
         a0 = scalar_from_bytes_nonzero_checked(seckey)
         fail if parsing fails
@@ -246,7 +248,7 @@ TrustedDealerKeygen(n, t, seckey=None):
     return TrustedDealerKeygenInternal(coeffs, n)
 </pre>
 
-If the internal invocation fails because a '''final''' participant share is zero and ''t > 1'', the dealer MAY resample the entire set of non-constant coefficients and retry while retaining ''a0''. No individual share may be repaired. Any other failure causes the current operation to fail. An imported secret MUST NOT be modified to repair failure.
+If the internal invocation fails because a '''final''' participant share is zero and ''t > 1'', the dealer MAY resample the entire set of non-constant coefficients and retry while retaining ''a0''. No individual share may be repaired. Any other failure, including a Taproot-safety failure, causes the current operation to fail whether the initial secret was generated or imported. An imported secret MUST NOT be modified to repair failure.
 
 === Internal Trusted Dealer Key Generation ===
 
@@ -255,7 +257,7 @@ If the internal invocation fails because a '''final''' participant share is zero
 <pre>
 TrustedDealerKeygenInternal(coeffs, n):
     t = len(coeffs)
-    fail unless 1 <= t <= n < 2^32
+    fail unless 1 <= t <= n <= 128
     fail if coeffs[0] = Scalar(0)
     commitments = [coeff * G for coeff in coeffs]
     fail if commitments[0] = inf_point
@@ -301,7 +303,7 @@ Each participant MUST perform the checks below and the distribution checks above
 <pre>
 ParticipantKeyAccept(id, n, t, secshare, vss_commitment,
                      thresh_pk=None, pubshares=None):
-    fail unless 1 <= t <= n < 2^32
+    fail unless 1 <= t <= n <= 128
     fail unless 0 <= id < n
     commitments = ParseVSSCommitment(vss_commitment, t)
     fail if parsing fails
@@ -341,9 +343,9 @@ Logical deletion means the implementation no longer intentionally retains or use
 
 === Use with BIP 445 ===
 
-A signing session selects ''u'' distinct participants, with ''t ≤ u ≤ n'', and uses their original identifiers, accepted secret shares, corresponding public shares, and common threshold public key. Long-term material MUST NOT be altered except by this specification's transformation or applicable BIP 445 algorithms. Signing-context validation does not replace participant acceptance.
+A signing session selects ''u'' distinct participants, with ''1 ≤ t ≤ u ≤ n ≤ 128'', and uses their original identifiers, accepted secret shares, corresponding public shares, and common threshold public key. Long-term material MUST NOT be altered except by this specification's transformation or applicable BIP 445 algorithms. Signing-context validation does not replace participant acceptance.
 
-The linked BIP 445 draft (version 0.11.2) restricts the total number of participants to ''n ≤ 128''. Applications targeting that version MUST restrict their key-generation parameters accordingly; outputs with larger ''n'' permitted by this draft's general parameter range are not compatible with that version. Its public key material is represented by ''Threshold Info'', and signing uses a ''Session Context''.
+[https://github.com/siv2r/bip-frost-signing BIP 445] represents public key material as ''Threshold Info'' and uses a ''Session Context'' for signing. The participant limit in this proposal follows its security requirement of ''n ≤ 128''.
 
 The output ''thresh_pk'' is a 33-byte plain public key. The word ''plain'' describes its representation, not whether it has been transformed. It is not a serialized Taproot witness program. The unresolved Taproot-safety issue is stated in [[#Taproot-Safety Transformation|Taproot-Safety Transformation]].
 
@@ -422,7 +424,7 @@ The [[bip-frost-trusted-dealer-test-vectors.json|deterministic test vectors]] pr
 
 A successful vector SHOULD include ''n'', ''t'', initial coefficients and commitments, ''tau'', final coefficients and commitments, ''vss_commitment'', ''thresh_pk'', and each participant's identifier, share, and public share. It MUST permit checking the transformation, Feldman equation, and threshold-key derivation. Failure vectors SHOULD identify the failing operation and failure class; identical error messages are not required.
 
-Coverage SHOULD include ''1-of-1'', a nontrivial threshold such as ''2-of-3'', ''t = n'', imported secrets, zero non-constant coefficients, and reconstruction from multiple signing subsets. Failure coverage SHOULD include invalid imported secrets and scalar encodings, malformed commitments, an infinity constant commitment, zero final shares, invalid identifiers, and tampered shares or commitments.
+Coverage SHOULD include ''1-of-1'', a nontrivial threshold such as ''2-of-3'', ''t = n'', imported secrets, zero non-constant coefficients, and reconstruction from multiple signing subsets. Parameter-boundary tests SHOULD accept ''n = 128'' and reject ''n = 129'' in dealer generation, public-share derivation, share verification, and participant acceptance. Failure coverage SHOULD include invalid imported secrets and scalar encodings, malformed commitments, an infinity constant commitment, zero final shares, invalid identifiers, and tampered shares or commitments. Retry tests SHOULD confirm that zero final shares resample all non-constant coefficients while retaining the initial secret, and that Taproot-safety failures abort for both generated and imported secrets.
 
 Implementations SHOULD cross-check the underlying Shamir and Feldman arithmetic against RFC 9591 where directly comparable, mapping RFC evaluation point ''x'' to ''id = x - 1''. Final outputs differ because this proposal additionally transforms the sharing.
 
@@ -430,7 +432,9 @@ Implementations SHOULD cross-check the underlying Shamir and Feldman arithmetic 
 
 The [[python/trusted_dealer_ref/trusted_dealer_ref.py|Python reference implementation]] implements the deterministic construction and participant checks. Its [[python/trusted_dealer_ref/test_trusted_dealer_ref.py|algorithm tests]] and [[python/trusted_dealer_ref/test_test_vectors.py|vector tests]] exercise generation, verification, and reconstruction. The Python generation entry point takes ''(t, n, seckey)'', while the pseudocode names its inputs ''(n, t, seckey)''.
 
-The specification is normative. One known difference remains in randomized failure handling: the Python wrapper retries with a new initial secret after a Taproot-safety failure when no secret was imported; the algorithm above fails that operation. The deterministic implementation and vectors use the additive transformation specified here.
+The specification is normative. The Python implementation enforces ''1 ≤ t ≤ n ≤ 128'' for generation and participant checks. Its randomized wrapper retries zero final shares by resampling non-constant coefficients while retaining the initial secret; Taproot-safety failures abort the operation. The deterministic implementation and vectors use the additive transformation specified here.
+
+The Python ''participant_key_accept'' function performs the local cryptographic checks and returns the participant identifier, secret share, threshold public key, own public share, and VSS commitment. The application retains ''n'' and ''t'', derives or retains the complete public-share list as needed, and establishes authenticated distribution and commitment agreement before declaring acceptance as required by [[#Participant Key Acceptance|Participant Key Acceptance]].
 
 The reference implementation is for demonstration and interoperability testing. It is not constant-time and does not provide reliable secret-memory erasure. Passing its tests does not establish production security or resolve the Taproot-safety review issue.
 

@@ -770,6 +770,17 @@ def test_zero_initial_share_vector():
 def test_invalid_vectors(vector):
     expected_failure = vector["expected_failure"]
 
+    if expected_failure == "invalid_parameters":
+        coeffs = [
+            scalar_from_hex(value)
+            for value in vector["initial_coefficients"]
+        ]
+        with pytest.raises(ValueError):
+            td.trusted_dealer_keygen(vector["t"], vector["n"])
+        with pytest.raises(ValueError):
+            td.trusted_dealer_keygen_internal(coeffs, vector["n"])
+        return
+
     if expected_failure == "invalid_seckey":
         with pytest.raises(ValueError):
             td.trusted_dealer_keygen(

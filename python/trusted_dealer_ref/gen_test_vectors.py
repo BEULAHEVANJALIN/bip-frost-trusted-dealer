@@ -126,6 +126,14 @@ def make_invalid_vectors() -> list[dict[str, Any]]:
 
     return [
         {
+            "name": "participant_count_above_limit",
+            "comment": "Participant count exceeds the BIP 445 limit of 128.",
+            "n": 129,
+            "t": 1,
+            "initial_coefficients": [scalar_hex(Scalar(1))],
+            "expected_failure": "invalid_parameters",
+        },
+        {
             "name": "zero_imported_secret",
             "comment": "Imported threshold secret is zero.",
             "n": 3,

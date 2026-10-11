@@ -1,6 +1,7 @@
 # test_trusted_dealer_ref.py
 
 from itertools import combinations
+from unittest.mock import Mock
 
 import pytest
 
@@ -94,6 +95,8 @@ def reconstruct_threshold_point(
         (0, 1),
         (2, 1),
         (1, 0),
+        (1, 129),
+        (129, 129),
         (1, 2**32),
         (2, 2**32),
     ],
@@ -106,6 +109,78 @@ def test_invalid_parameters(t, n):
 def test_single_participant_is_valid():
     # BIP 445 permits n = 1.
     td.validate_params(1, 1)
+
+
+def test_maximum_participant_count():
+    td.validate_params(128, 128)
+    output = td.trusted_dealer_keygen_internal([s(1), s(2)], 128)
+    assert len(output.secshares) == len(output.pubshares) == 128
+    assert td.participant_evaluation_point(127, 128) == s(128)
+    accepted = td.participant_key_accept(
+        127, 128, 2, output.secshares[127], output.vss_commitment,
+        output.thresh_pk, output.pubshares,
+    )
+    assert accepted.pubshare == output.pubshares[127]
+    with pytest.raises(ValueError):
+        td.participant_evaluation_point(128, 128)
+
+
+@pytest.mark.parametrize("n", [0, 129, 2**32])
+def test_participant_limit_at_public_entry_points(n, monkeypatch):
+    # Valid cryptographic inputs must not bypass parameter validation.
+    output = td.trusted_dealer_keygen_internal([s(1)], 1)
+    sampler = Mock(side_effect=AssertionError("Unexpected randomness"))
+    monkeypatch.setattr(td, "random_nonzero_scalar", sampler)
+    for seckey in (None, s(1).to_bytes()):
+        with pytest.raises(ValueError):
+            td.trusted_dealer_keygen(1, n, seckey)
+    with pytest.raises(ValueError):
+        td.trusted_dealer_keygen_internal([s(1)], n)
+    with pytest.raises(ValueError):
+        td.participant_evaluation_point(0, n)
+    with pytest.raises(ValueError):
+        td.derive_pubshare_from_commitment(0, n, 1, output.vss_commitment)
+    assert not td.verify_secshare(
+        0, n, 1, output.secshares[0], output.vss_commitment,
+    )
+    with pytest.raises(ValueError):
+        td.participant_key_accept(
+            0, n, 1, output.secshares[0], output.vss_commitment,
+        )
+    sampler.assert_not_called()
+
+
+@pytest.mark.parametrize("imported", [False, True])
+@pytest.mark.parametrize("failure", ["out_of_range_tweak", "zero_final_secret"])
+def test_taproot_safety_failure_aborts(imported, failure, monkeypatch):
+    a0 = s(17)
+    sampler = Mock(side_effect=[a0])
+    monkeypatch.setattr(td, "random_nonzero_scalar", sampler)
+    tweak = SECP256K1_ORDER if failure == "out_of_range_tweak" else SECP256K1_ORDER - 17
+    hasher = Mock(return_value=tweak.to_bytes(32, "big"))
+    monkeypatch.setattr(td, "tagged_hash", hasher)
+    with pytest.raises(td.TaprootSafetyError):
+        td.trusted_dealer_keygen(1, 1, a0.to_bytes() if imported else None)
+    assert sampler.call_count == (0 if imported else 1)
+    hasher.assert_called_once()
+
+
+@pytest.mark.parametrize("imported", [False, True])
+def test_zero_final_share_retries_all_nonconstant_coefficients(imported, monkeypatch):
+    a0 = s(17)
+    final_constant = a0 + td.taproot_safety_tweak(a0 * G)
+    # The first polynomial has final f(1) = 0; the second succeeds.
+    bad_a2 = s(5)
+    bad_a1 = s(0) - final_constant - bad_a2
+    expected = td.trusted_dealer_keygen_internal([a0, s(1), s(2)], 3)
+    initial_sampler = Mock(side_effect=[a0])
+    coefficient_sampler = Mock(side_effect=[bad_a1, bad_a2, s(1), s(2)])
+    monkeypatch.setattr(td, "random_nonzero_scalar", initial_sampler)
+    monkeypatch.setattr(td, "random_scalar", coefficient_sampler)
+    output = td.trusted_dealer_keygen(3, 3, a0.to_bytes() if imported else None)
+    assert output == expected
+    assert initial_sampler.call_count == (0 if imported else 1)
+    assert coefficient_sampler.call_count == 4
 
 
 #

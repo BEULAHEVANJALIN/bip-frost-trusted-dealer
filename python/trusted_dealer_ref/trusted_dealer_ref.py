@@ -72,9 +72,9 @@ class ParticipantAcceptedKeyMaterial(NamedTuple):
 
 
 def validate_params(t: int, n: int) -> None:
-    if not (1 <= t <= n < 2**32):
+    if not (1 <= t <= n <= 128):
         raise ValueError(
-            "Parameters must satisfy 1 <= t <= n < 2**32."
+            "Parameters must satisfy 1 <= t <= n <= 128."
         )
 
 
@@ -152,10 +152,10 @@ def participant_evaluation_point(
 
         x_id = participant_id + 1
     """
-    if not (1 <= n < 2**32):
+    if not (1 <= n <= 128):
         raise ValueError(
             "The number of participants must satisfy "
-            "1 <= n < 2**32."
+            "1 <= n <= 128."
         )
 
     if not (0 <= participant_id < n):
@@ -508,6 +508,10 @@ def trusted_dealer_keygen(
     For an imported secret, this function can validate scalar encoding
     but cannot determine whether the caller supplied a secret with
     sufficient entropy.
+
+    Only a zero final participant share permits retrying with fresh
+    nonconstant coefficients and the same initial secret. A Taproot
+    safety failure aborts the operation, including for generated secrets.
     """
     validate_params(t, n)
 
@@ -561,16 +565,6 @@ def trusted_dealer_keygen(
                 )
 
             continue
-
-        except TaprootSafetyError:
-            # The TapTweak and final constant term depend only on a_0.
-            # Resampling nonconstant coefficients cannot repair this.
-            if imported:
-                raise
-
-            # For internally generated key material, choose a new
-            # initial threshold secret and retry.
-            a_0 = random_nonzero_scalar()
 
 
 #

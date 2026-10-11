@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.12.1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>bip-frost-trusted-dealer-revised</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      color: light-dark(#1a1a1a, #fdfdfd);
+      background-color: #fdfdfd;
+      background-color: light-dark(#fdfdfd, #1a1a1a);
+      color-scheme: light dark;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        color-scheme: light only;
+      }
+      html, body, pre, code {
+        background-color: transparent;
+      }
+      body, a, a:visited, blockquote {
+        color: black;
+      }
+      pre, code {
+        padding: 0;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a, a:visited {
+      color: inherit;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid;
+      border-color: #e6e6e6;
+      border-color: light-dark(#e6e6e6, #4c4c4c);
+      color: #606060;
+      color: light-dark(#606060, #b6b6b6);
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid currentColor;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
+    }
+    th {
+      border-top: 1px solid currentColor;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#abstract" id="toc-abstract">Abstract</a></li>
+<li><a href="#copyright" id="toc-copyright">Copyright</a></li>
+<li><a href="#motivation" id="toc-motivation">Motivation</a></li>
+<li><a href="#specification" id="toc-specification">Specification</a>
+<ul>
+<li><a href="#overview-and-scope" id="toc-overview-and-scope">Overview
+and Scope</a></li>
+<li><a href="#parameters-and-outputs"
+id="toc-parameters-and-outputs">Parameters and Outputs</a></li>
+<li><a href="#cryptographic-domain-and-notation"
+id="toc-cryptographic-domain-and-notation">Cryptographic Domain and
+Notation</a></li>
+<li><a href="#encodings" id="toc-encodings">Encodings</a></li>
+<li><a href="#randomness-and-secret-import"
+id="toc-randomness-and-secret-import">Randomness and Secret
+Import</a></li>
+<li><a href="#polynomial-evaluation"
+id="toc-polynomial-evaluation">Polynomial Evaluation</a></li>
+<li><a href="#parsing-a-vss-commitment"
+id="toc-parsing-a-vss-commitment">Parsing a VSS Commitment</a></li>
+<li><a href="#taproot-safety-transformation"
+id="toc-taproot-safety-transformation">Taproot-Safety
+Transformation</a></li>
+<li><a href="#public-key-derivation-and-share-verification"
+id="toc-public-key-derivation-and-share-verification">Public-Key
+Derivation and Share Verification</a></li>
+<li><a href="#trusted-dealer-key-generation"
+id="toc-trusted-dealer-key-generation">Trusted Dealer Key
+Generation</a></li>
+<li><a href="#internal-trusted-dealer-key-generation"
+id="toc-internal-trusted-dealer-key-generation">Internal Trusted Dealer
+Key Generation</a></li>
+<li><a href="#secret-share-distribution"
+id="toc-secret-share-distribution">Secret-Share Distribution</a></li>
+<li><a href="#participant-key-acceptance"
+id="toc-participant-key-acceptance">Participant Key Acceptance</a></li>
+<li><a href="#completion-and-failure-handling"
+id="toc-completion-and-failure-handling">Completion and Failure
+Handling</a></li>
+<li><a href="#use-with-bip-445" id="toc-use-with-bip-445">Use with BIP
+445</a></li>
+</ul></li>
+<li><a href="#rationale" id="toc-rationale">Rationale</a>
+<ul>
+<li><a href="#trusted-dealer-and-verifiable-sharing"
+id="toc-trusted-dealer-and-verifiable-sharing">Trusted Dealer and
+Verifiable Sharing</a></li>
+<li><a href="#identifiers-and-encodings"
+id="toc-identifiers-and-encodings">Identifiers and Encodings</a></li>
+<li><a href="#key-generation-tweak"
+id="toc-key-generation-tweak">Key-Generation Tweak</a></li>
+</ul></li>
+<li><a href="#correctness" id="toc-correctness">Correctness</a></li>
+<li><a href="#security-considerations"
+id="toc-security-considerations">Security Considerations</a>
+<ul>
+<li><a href="#dealer-trust-and-randomness"
+id="toc-dealer-trust-and-randomness">Dealer Trust and
+Randomness</a></li>
+<li><a href="#share-protection-and-commitment-agreement"
+id="toc-share-protection-and-commitment-agreement">Share Protection and
+Commitment Agreement</a></li>
+<li><a href="#erasure-and-implementation-security"
+id="toc-erasure-and-implementation-security">Erasure and Implementation
+Security</a></li>
+<li><a href="#taproot-and-signing-validation"
+id="toc-taproot-and-signing-validation">Taproot and Signing
+Validation</a></li>
+</ul></li>
+<li><a href="#backward-compatibility"
+id="toc-backward-compatibility">Backward Compatibility</a></li>
+<li><a href="#test-vectors" id="toc-test-vectors">Test Vectors</a></li>
+<li><a href="#reference-implementation"
+id="toc-reference-implementation">Reference Implementation</a></li>
+<li><a href="#acknowledgments"
+id="toc-acknowledgments">Acknowledgments</a></li>
+</ul>
+</nav>
+<pre><code>  BIP: ?
+  Layer: Applications
+  Title: FROST Trusted Dealer Key Generation
+  Authors: Beulah Evanjalin &lt;beulahebenezer777@gmail.com&gt;
+  Status: Draft
+  Type: Specification
+  Assigned: ?
+  License: CC0-1.0
+  Requires: 445</code></pre>
+<h2 id="abstract">Abstract</h2>
+<p>This document specifies trusted-dealer generation and verification of
+threshold key material for the FROST signing protocol in <a
+href="https://github.com/siv2r/bip-frost-signing">BIP 445</a>. It
+specializes the Shamir secret-sharing and Feldman verifiable
+secret-sharing construction in <a
+href="https://datatracker.ietf.org/doc/html/rfc9591#appendix-C">RFC 9591
+Appendix C</a> for secp256k1, defining participant identifiers,
+encodings, a key-generation tweak, share verification, and acceptance
+requirements.</p>
+<p>A dealer generates or imports an initial secret, distributes one
+secret share to each participant, and publishes commitments from which
+participants derive the threshold public key and public shares. The
+dealer learns the complete secret and must be trusted to protect and
+erase secret material. Signing and distributed key generation are
+outside the scope of this proposal.</p>
+<h2 id="copyright">Copyright</h2>
+<p>This document and its auxiliary material are made available under <a
+href="https://creativecommons.org/publicdomain/zero/1.0/legalcode">CC0
+1.0 Universal</a>, unless an auxiliary file specifies different terms.
+Referenced external works retain their own licenses.</p>
+<h2 id="motivation">Motivation</h2>
+<p>BIP 445 specifies FROST signing with BIP 340-compatible signatures
+but leaves key generation to a separate protocol. RFC 9591 provides a
+trusted-dealer construction, but implementations also need agreement on
+Bitcoin-specific key representations, participant identifiers,
+validation, and the relationship between key generation and Taproot
+tweaking.</p>
+<p>This proposal defines those rules for deployments that accept a
+trusted setup party, such as a provisioning service or trusted hardware
+device. Feldman commitments let participants check their shares against
+a common polynomial and derive the public signing material
+independently. Deployments in which no single party may learn the
+complete secret require a distributed key-generation protocol, such as
+<a
+href="https://github.com/BlockstreamResearch/bip-frost-dkg">ChillDKG</a>.</p>
+<h2 id="specification">Specification</h2>
+<p>The key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY specify
+implementation requirements. The algorithms below define the
+computational behavior; the distribution and completion requirements
+also apply to a successful key-generation ceremony. An algorithm that
+fails MUST NOT return usable or partial key material.</p>
+<h3 id="overview-and-scope">Overview and Scope</h3>
+<p>The <strong>dealer</strong> constructs a sharing polynomial, computes
+its Feldman commitments, applies the key-generation transformation, and
+distributes the final shares. Each <strong>participant</strong> verifies
+its share and establishes that all participants accepted the same final
+commitment. A participant selected for a later signing session is a
+<strong>signer</strong>. The dealer need not be a participant or take
+part in signing.</p>
+<p>The procedure consists of:</p>
+<ol type="1">
+<li><a href="#trusted-dealer-key-generation">Generating</a> the final
+shares and commitments.</li>
+<li><a href="#secret-share-distribution">Distributing</a> each secret
+share with its authenticated context.</li>
+<li><a href="#participant-key-acceptance">Verifying</a> the
+participant’s share and public data.</li>
+<li><a href="#completion-and-failure-handling">Completing</a> the
+ceremony and deleting dealer-held secrets.</li>
+</ol>
+<p>This proposal does not define signing, nonce generation, share
+refresh or repair, participant replacement, secret recovery, transport
+wire formats, wallet backups, or Bitcoin transaction and Taproot script
+construction. Requirements on transport and secret handling still apply
+even though their implementation is application-specific.</p>
+<h3 id="parameters-and-outputs">Parameters and Outputs</h3>
+<p>Key generation takes a participant count <em>n</em>, a threshold
+<em>t</em>, and optionally an initial secret <em>seckey</em>. The
+parameters MUST satisfy <em>1 ≤ t ≤ n ≤ 128</em>, matching <a
+href="https://github.com/siv2r/bip-frost-signing">BIP 445</a>.</p>
+<p>Participant identifiers are the integers <em>id = 0, …, n - 1</em>.
+Participant <em>id</em> has the nonzero Shamir evaluation point
+<em>x<sub>id</sub> = id + 1</em>. Implementations MUST NOT use
+<em>id</em> itself as the evaluation point or renumber participants when
+selecting a signing set.</p>
+<p>Successful key generation produces:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Value</th>
+<th>Representation</th>
+<th>Visibility</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>n</em>, <em>t</em></td>
+<td>Participant count and threshold</td>
+<td>Public</td>
+</tr>
+<tr>
+<td><em>thresh_pk</em></td>
+<td>33-byte compressed threshold public key</td>
+<td>Public</td>
+</tr>
+<tr>
+<td><em>pubshares</em></td>
+<td><em>n</em> compressed public shares in identifier order</td>
+<td>Public</td>
+</tr>
+<tr>
+<td><em>vss_commitment</em></td>
+<td><em>33t</em> bytes, in coefficient order</td>
+<td>Public</td>
+</tr>
+<tr>
+<td><em>secshares[id]</em></td>
+<td>32-byte nonzero scalar for participant <em>id</em></td>
+<td>Private to that participant</td>
+</tr>
+</tbody>
+</table>
+<p>The dealer’s output contains all shares for distribution; each
+participant receives only its own. Public data requires integrity and
+association with the ceremony, but not confidentiality. The VSS
+commitment is used for key-generation verification and is not an input
+to signing.</p>
+<p>For <em>t = 1</em>, every participant holds the complete final
+secret. This includes <em>n = 1</em> and provides no threshold
+secrecy.</p>
+<h3 id="cryptographic-domain-and-notation">Cryptographic Domain and
+Notation</h3>
+<p>This specification uses the secp256k1 group and scalar field
+described by <a
+href="https://datatracker.ietf.org/doc/html/rfc9591#section-6.5">RFC
+9591 Section 6.5</a>.</p>
+<p>Let <em>G</em> be the standard secp256k1 generator,
+<em>inf_point</em> the group identity, and <em>q</em> the prime order of
+<em>G</em>:</p>
+<blockquote>
+<p><em>q =
+0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141</em>.</p>
+</blockquote>
+<p>Scalars are elements of the field of integers modulo <em>q</em>.
+Initial and final threshold secrets and final participant secret shares
+MUST be nonzero. Non-constant polynomial coefficients MAY be zero,
+including the highest coefficient, so the sharing polynomial has degree
+at most <em>t - 1</em>.</p>
+<p>Write the initial sharing polynomial as:</p>
+<blockquote>
+<p><em>f(x) = a<sub>0</sub> + a<sub>1</sub>x + … +
+a<sub>t-1</sub>x<sup>t-1</sup></em>,</p>
+</blockquote>
+<p>where <em>a<sub>0</sub></em> is the initial secret and
+<em>a<sub>1</sub>, …, a<sub>t-1</sub></em> are the non-constant
+coefficients. Participant <em>id</em> has evaluation point
+<em>x<sub>id</sub> = id + 1</em> and initial share <em>d<sub>id</sub> =
+f(x<sub>id</sub>)</em>.</p>
+<p>Use <em>b<sub>j</sub></em>, <em>B<sub>j</sub></em>, and
+<em>f<sub>final</sub></em> for the coefficients, commitments, and
+polynomial after the mandatory key-generation transformation. The final
+secret share is <em>secshare<sub>id</sub> =
+f<sub>final</sub>(x<sub>id</sub>)</em>, and its public point is
+<em>P<sub>id</sub> = secshare<sub>id</sub>G</em>. The serialized public
+share is <em>pubshares[id] = cbytes(P<sub>id</sub>)</em>.</p>
+<h4 id="feldman-vss-commitments">Feldman VSS Commitments</h4>
+<p>For each initial polynomial coefficient <em>a<sub>j</sub></em>,
+define its Feldman commitment:</p>
+<blockquote>
+<p><em>A<sub>j</sub> = a<sub>j</sub>G</em>, for <em>0 ≤ j &lt;
+t</em>.</p>
+</blockquote>
+<p>The ordered sequence <em>(A<sub>0</sub>, A<sub>1</sub>, …,
+A<sub>t-1</sub>)</em> commits to the initial sharing polynomial. Because
+<em>a<sub>0</sub></em> is nonzero, <em>A<sub>0</sub></em> MUST NOT be
+<em>inf_point</em>. A zero non-constant coefficient gives
+<em>A<sub>j</sub> = inf_point</em>, which MUST be permitted for <em>j
+&gt; 0</em>.</p>
+<p>Evaluation of the initial commitment at <em>x<sub>id</sub></em>
+gives:</p>
+<blockquote>
+<p><em>A<sub>0</sub> + x<sub>id</sub>A<sub>1</sub> + … +
+x<sub>id</sub><sup>t-1</sup>A<sub>t-1</sub> = d<sub>id</sub>G</em>.</p>
+</blockquote>
+<p>The same relationship holds after transformation, with
+<em>B<sub>j</sub> = b<sub>j</sub>G</em>:</p>
+<blockquote>
+<p><em>P<sub>id</sub> = B<sub>0</sub> + x<sub>id</sub>B<sub>1</sub> + …
++ x<sub>id</sub><sup>t-1</sup>B<sub>t-1</sub> =
+secshare<sub>id</sub>G</em>.</p>
+</blockquote>
+<p>This is the relationship participants verify against the final VSS
+commitment. The final constant commitment <em>B<sub>0</sub></em> and
+every final participant public point MUST be non-infinity. Non-constant
+final commitments MAY be infinity. Their serialization is defined in <a
+href="#encodings">Encodings</a>.</p>
+<p>Feldman commitments establish share consistency with the committed
+polynomial. They are not information-theoretically hiding; recovering a
+high-entropy coefficient from its commitment relies on the hardness of
+the secp256k1 discrete logarithm problem. Verification does not
+establish unbiased randomness, confidentiality, exclusive delivery, or
+dealer erasure. Those properties remain part of the trusted-dealer
+assumption.</p>
+<h4 id="group-and-scalar-operations">Group and Scalar Operations</h4>
+<p>For a scalar <em>a</em> and group element <em>P</em>, <em>aP</em>
+denotes scalar multiplication. For group elements <em>P</em> and
+<em>Q</em>, <em>P + Q</em> denotes elliptic-curve group addition, with
+identity <em>inf_point</em>.</p>
+<p>All scalar addition, subtraction, multiplication, exponentiation, and
+inversion are performed modulo <em>q</em>. Inversion is defined only for
+nonzero scalars. <em>Scalar(x)</em> converts an integer in <em>0 ≤ x
+&lt; q</em> to a scalar.</p>
+<p>Implementations MUST validate externally supplied group encodings
+according to their type. Threshold public keys and participant public
+shares MUST decode to valid non-infinity secp256k1 points. VSS elements
+use the extended encoding in <a href="#encodings">Encodings</a>, which
+permits infinity only for non-constant commitments. Because secp256k1
+has cofactor one, a valid non-infinity curve point belongs to the
+required prime-order group.</p>
+<p>Lists are zero-indexed, slices exclude the upper bound, <em>||</em>
+concatenates byte strings, and <em>None</em> denotes an omitted optional
+input.</p>
+<h4 id="relationship-to-the-frost-ciphersuite">Relationship to the FROST
+Ciphersuite</h4>
+<p>The group, generator, group order, scalar arithmetic, and ordinary
+compressed-point representation follow the FROST(secp256k1, SHA-256)
+ciphersuite in RFC 9591. This proposal does not define a new ciphersuite
+or adopt RFC 9591’s signing algorithms or signing hash functions.</p>
+<p>Signing of the resulting participant secret shares, public shares,
+and threshold public key is specified by <a
+href="https://github.com/siv2r/bip-frost-signing">BIP 445</a>, subject
+to its validation requirements. The key-generation transformation and
+extended commitment encoding are defined by this proposal.</p>
+<h3 id="encodings">Encodings</h3>
+<p>All integer encodings are unsigned and big-endian. Parsers MUST
+reject an incorrect length or a noncanonical encoding.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Value or operation</th>
+<th>Encoding and validation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><em>scalar_to_bytes(s)</em></td>
+<td>Exactly 32 bytes encoding <em>0 ≤ s &lt; q</em>.</td>
+</tr>
+<tr>
+<td><em>scalar_from_bytes_checked(b)</em></td>
+<td>Parse exactly 32 bytes; fail if the integer is at least
+<em>q</em>.</td>
+</tr>
+<tr>
+<td><em>scalar_from_bytes_nonzero_checked(b)</em></td>
+<td>As above, additionally rejecting zero. Used for imported secrets and
+final secret shares.</td>
+</tr>
+<tr>
+<td><em>cbytes(P)</em>, <em>cpoint(b)</em></td>
+<td>Exactly 33 bytes: <em>0x02 || X</em> for even Y or <em>0x03 ||
+X</em> for odd Y, with a 32-byte X coordinate. Parsing requires
+canonical coordinates and a valid non-infinity secp256k1 point.</td>
+</tr>
+<tr>
+<td><em>cbytes_ext(P)</em>, <em>cpoint_ext(b)</em></td>
+<td>Ordinary compressed encoding for non-infinity points; exactly 33
+zero bytes for <em>inf_point</em>. All other encodings fail.</td>
+</tr>
+<tr>
+<td><em>xbytes(P)</em></td>
+<td>The 32-byte X coordinate of a non-infinity point, equal to
+<em>cbytes(P)[1:33]</em>.</td>
+</tr>
+<tr>
+<td>Participant identifier</td>
+<td>Exactly four bytes encoding <em>id</em>; it must also satisfy <em>0
+≤ id &lt; n</em> for the ceremony.</td>
+</tr>
+<tr>
+<td><em>vss_commitment</em></td>
+<td><em>cbytes_ext(B<sub>0</sub>) || … ||
+cbytes_ext(B<sub>t-1</sub>)</em>, exactly <em>33t</em> bytes in
+coefficient order.</td>
+</tr>
+</tbody>
+</table>
+<p><em>B<sub>0</sub></em> MUST NOT be infinity. A non-constant
+commitment MAY be infinity, representing a zero coefficient. Extended
+encodings MUST NOT permit infinity as a threshold public key or
+participant public share. Commitment elements MUST NOT be reordered,
+omitted, or duplicated.</p>
+<p>Invalid imported secrets and final shares MUST be rejected, not
+reduced modulo <em>q</em>, hashed, truncated, clamped, incremented, or
+otherwise repaired. Explicit transformations of already valid scalars
+are separate from parsing.</p>
+<p>Compressed public keys preserve Y parity. X-only encoding discards
+it, and BIP 340 interprets that encoding as the even-Y point. Final
+public shares and <em>thresh_pk</em> are full points and need not have
+even Y. Any signing-time parity adjustment follows BIP 445.</p>
+<h3 id="randomness-and-secret-import">Randomness and Secret Import</h3>
+<p>The dealer MUST use cryptographically secure randomness. A generated
+initial secret is sampled uniformly from <em>{1, …, q - 1}</em>. Each
+non-constant coefficient is sampled independently and uniformly from
+<em>{0, …, q - 1}</em>.</p>
+<p>Random scalar generation SHOULD follow <a
+href="https://datatracker.ietf.org/doc/html/rfc9591#appendix-D">RFC 9591
+Appendix D</a>. Rejection sampling of 32 random bytes is one suitable
+method. Simply reducing a random 32-byte integer modulo <em>q</em> MUST
+NOT be used as a uniform sampler. Zero candidates for a nonzero secret
+are discarded and sampled again.</p>
+<p>An imported <em>seckey</em> MUST be a canonical nonzero scalar
+derived from at least 32 bytes of entropy, as required by RFC 9591
+Appendix C for this scalar size. Its supplier is responsible for its
+entropy and confidentiality; these cannot be established from the
+encoding. Importing a secret does not repair weak generation or prior
+disclosure.</p>
+<p>The imported scalar is the <strong>initial</strong> constant
+coefficient. The mandatory transformation changes the final shared
+secret, so importing <em>seckey</em> does not generally preserve the
+public key <em>seckey * G</em>.</p>
+<h3 id="polynomial-evaluation">Polynomial Evaluation</h3>
+<p><em>PolynomialEvaluate</em> and <em>PolynomialEvaluatePoint</em> use
+Horner’s method on non-empty lists in ascending coefficient order. Group
+evaluation permits infinity elements.</p>
+<pre><code>PolynomialEvaluate(coeffs, x):
+    value = Scalar(0)
+    for coeff in reverse(coeffs):
+        value = value * x + coeff
+    return value
+
+PolynomialEvaluatePoint(commitments, x):
+    result = inf_point
+    for A in reverse(commitments):
+        result = x * result + A
+    return result
+
+ParticipantEvaluationPoint(id, n):
+    fail unless 1 &lt;= n &lt;= 128
+    fail unless 0 &lt;= id &lt; n
+    return Scalar(id + 1)</code></pre>
+<h3 id="parsing-a-vss-commitment">Parsing a VSS Commitment</h3>
+<pre><code>ParseVSSCommitment(vss_commitment, t):
+    fail if t &lt; 1
+    fail unless len(vss_commitment) = 33 * t
+    commitments = []
+    for j = 0 .. t - 1:
+        B = cpoint_ext(vss_commitment[33*j : 33*(j+1)])
+        fail if parsing fails
+        fail if j = 0 and B = inf_point
+        append B to commitments
+    return commitments</code></pre>
+<h3 id="taproot-safety-transformation">Taproot-Safety
+Transformation</h3>
+<p>The dealer MUST apply the transformation below before distributing
+shares. Define the BIP 341 tagged hash by:</p>
+<blockquote>
+<p><em>hash<sub>TapTweak</sub>(m) = SHA256(SHA256(“TapTweak”) ||
+SHA256(“TapTweak”) || m)</em>,</p>
+</blockquote>
+<p>where the tag is encoded as ASCII. The hash input is the initial
+point’s X coordinate without a Merkle root. Its integer value MUST be
+less than <em>q</em>; it is not reduced modulo <em>q</em>.</p>
+<pre><code>TaprootSafetyTweak(P):
+    fail if P = inf_point
+    h = hash_TapTweak(xbytes(P))
+    v = unsigned big-endian integer represented by h
+    fail if v &gt;= q
+    return Scalar(v)
+
+ApplyTaprootSafety(coeffs, commitments):
+    fail unless len(coeffs) = len(commitments) &gt;= 1
+    # Inputs satisfy commitments[j] = coeffs[j] * G.
+    fail if commitments[0] = inf_point
+    tau = TaprootSafetyTweak(commitments[0])
+    fail if that fails
+    final_coeffs = copy(coeffs)
+    final_commitments = copy(commitments)
+    final_coeffs[0] = coeffs[0] + tau
+    final_commitments[0] = commitments[0] + tau * G
+    fail if final_coeffs[0] = Scalar(0)
+    fail if final_commitments[0] = inf_point
+    fail unless final_commitments[0] = final_coeffs[0] * G
+    return (final_coeffs, final_commitments, tau)</code></pre>
+<p>Thus <em>f<sub>final</sub>(x) = f(x) + tau</em>, <em>B<sub>0</sub> =
+A<sub>0</sub> + tau G</em>, and <em>B<sub>j</sub> = A<sub>j</sub></em>
+for <em>j &gt; 0</em>. Every share is shifted by the same scalar. This
+transformation uses the initial full point without first normalizing it
+to even Y.</p>
+<p><strong>Review issue:</strong> The additive transformation retained
+here matches the source draft’s normative algorithms and deterministic
+reference implementation. For an odd-Y <em>A<sub>0</sub></em>, it
+differs from the <a
+href="https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#constructing-and-spending-taproot-outputs">BIP
+341 no-script-path construction</a>, which uses the even-Y lift of the
+internal key. Whether this transformation meets BIP 445’s Taproot-safety
+requirement remains to be resolved; consistency of shares alone does not
+establish that property.</p>
+<h3 id="public-key-derivation-and-share-verification">Public-Key
+Derivation and Share Verification</h3>
+<p>The final VSS commitment is authoritative. The threshold point is
+<em>B<sub>0</sub></em>; participant <em>id</em> has public point
+<em>P<sub>id</sub> = Σ<sub>j=0</sub><sup>t-1</sup> (id +
+1)<sup>j</sup>B<sub>j</sub></em>. A separately supplied public key MUST
+match the value derived from this commitment.</p>
+<pre><code>DerivePubshareFromCommitment(id, n, t, vss_commitment):
+    x = ParticipantEvaluationPoint(id, n)
+    commitments = ParseVSSCommitment(vss_commitment, t)
+    fail if either operation fails
+    P = PolynomialEvaluatePoint(commitments, x)
+    fail if P = inf_point
+    return cbytes(P)
+
+ThreshPubkeyFromCommitment(t, vss_commitment):
+    commitments = ParseVSSCommitment(vss_commitment, t)
+    fail if parsing fails
+    return cbytes(commitments[0])
+
+VerifySecshare(id, n, t, secshare, vss_commitment):
+    d = scalar_from_bytes_nonzero_checked(secshare)
+    x = ParticipantEvaluationPoint(id, n)
+    commitments = ParseVSSCommitment(vss_commitment, t)
+    return False if any operation above fails
+    return d * G = PolynomialEvaluatePoint(commitments, x)</code></pre>
+<p>Verification compares group elements. Since <em>d</em> is nonzero, an
+infinity expected point fails verification without needing to serialize
+it. These helpers do not establish transport authentication, commitment
+agreement, or all ceremony-level parameter constraints; participants
+MUST perform the complete acceptance procedure below.</p>
+<h3 id="trusted-dealer-key-generation">Trusted Dealer Key
+Generation</h3>
+<p><em>TrustedDealerKeygen(n, t, seckey)</em> generates an initial
+coefficient list and invokes the deterministic algorithm below.</p>
+<pre><code>TrustedDealerKeygen(n, t, seckey=None):
+    fail unless 1 &lt;= t &lt;= n &lt;= 128
+    if seckey is supplied:
+        a0 = scalar_from_bytes_nonzero_checked(seckey)
+        fail if parsing fails
+    else:
+        a0 = uniformly sampled nonzero scalar
+    coeffs = [a0]
+    for j = 1 .. t - 1:
+        append an independently uniformly sampled scalar to coeffs
+    return TrustedDealerKeygenInternal(coeffs, n)</code></pre>
+<p>If the internal invocation fails because a <strong>final</strong>
+participant share is zero and <em>t &gt; 1</em>, the dealer MAY resample
+the entire set of non-constant coefficients and retry while retaining
+<em>a0</em>. No individual share may be repaired. Any other failure
+causes the current operation to fail. An imported secret MUST NOT be
+modified to repair failure.</p>
+<h3 id="internal-trusted-dealer-key-generation">Internal Trusted Dealer
+Key Generation</h3>
+<p><em>TrustedDealerKeygenInternal(coeffs, n)</em> takes a non-empty
+list of canonical scalars in ascending coefficient order and produces
+the final serialized material. It MUST NOT sample randomness. An
+implementation SHOULD expose an equivalent deterministic operation for
+testing; production generation MUST NOT substitute fixed test
+coefficients for secure randomness.</p>
+<pre><code>TrustedDealerKeygenInternal(coeffs, n):
+    t = len(coeffs)
+    fail unless 1 &lt;= t &lt;= n &lt;= 128
+    fail if coeffs[0] = Scalar(0)
+    commitments = [coeff * G for coeff in coeffs]
+    fail if commitments[0] = inf_point
+    (final_coeffs, final_commitments, tau) =
+        ApplyTaprootSafety(coeffs, commitments)
+    fail if that fails
+
+    vss_commitment = concatenation of cbytes_ext(B)
+                     for B in final_commitments, in order
+    thresh_pk = cbytes(final_commitments[0])
+    secshares = []
+    pubshares = []
+    for id = 0 .. n - 1:
+        x = ParticipantEvaluationPoint(id, n)
+        d = PolynomialEvaluate(final_coeffs, x)
+        fail if d = Scalar(0)
+        P = d * G
+        fail if P = inf_point
+        fail unless P = PolynomialEvaluatePoint(final_commitments, x)
+        append scalar_to_bytes(d) to secshares
+        append cbytes(P) to pubshares
+
+    fail unless ThreshPubkeyFromCommitment(t, vss_commitment) = thresh_pk
+    for id = 0 .. n - 1:
+        fail unless VerifySecshare(id, n, t, secshares[id], vss_commitment)
+    return (vss_commitment, thresh_pk, pubshares, secshares)</code></pre>
+<p>All called operations MUST succeed. The lists are ordered by
+participant identifier. Only final shares are required to be nonzero: a
+zero evaluation of the initial polynomial does not itself cause failure.
+No initial, intermediate, or rejected sharing may be distributed as
+output.</p>
+<h3 id="secret-share-distribution">Secret-Share Distribution</h3>
+<p>After dealer-side validation, the dealer MUST deliver
+<em>secshares[id]</em> only to its intended participant over a mutually
+authenticated channel providing confidentiality and integrity. The share
+MUST be authenticated together with at least <em>(n, t, id,
+vss_commitment)</em>. Retransmitting the same share to its intended
+participant is permitted.</p>
+<p>The application defines the transport and serialization of this
+context. It MAY additionally bind a ceremony identifier, transcript
+identifier, device identity, or network identity. A share from another
+ceremony MUST NOT be accepted merely because it uses the same
+participant identifier.</p>
+<p>All participants MUST establish a consistent view of the same final
+<em>vss_commitment</em>. Its integrity and association with the
+delivered share MUST be protected. Authenticated point-to-point delivery
+alone does not establish agreement; an application MAY use a secure
+authenticated broadcast mechanism. A participant unable to establish the
+required association or agreement MUST reject the result.</p>
+<h3 id="participant-key-acceptance">Participant Key Acceptance</h3>
+<p>Each participant MUST perform the checks below and the distribution
+checks above before using its share. <em>thresh_pk</em> and
+<em>pubshares</em> MAY be omitted when derived exclusively from the
+commitment.</p>
+<pre><code>ParticipantKeyAccept(id, n, t, secshare, vss_commitment,
+                     thresh_pk=None, pubshares=None):
+    fail unless 1 &lt;= t &lt;= n &lt;= 128
+    fail unless 0 &lt;= id &lt; n
+    commitments = ParseVSSCommitment(vss_commitment, t)
+    fail if parsing fails
+    fail unless VerifySecshare(id, n, t, secshare, vss_commitment)
+    derived_thresh_pk = ThreshPubkeyFromCommitment(t, vss_commitment)
+    derived_pubshare = DerivePubshareFromCommitment(id, n, t, vss_commitment)
+    fail if either derivation fails
+
+    if thresh_pk is supplied:
+        fail if cpoint(thresh_pk) fails
+        fail unless thresh_pk = derived_thresh_pk
+    if pubshares is supplied:
+        fail unless len(pubshares) = n
+        for j = 0 .. n - 1:
+            derived = DerivePubshareFromCommitment(j, n, t, vss_commitment)
+            fail if derivation or cpoint(pubshares[j]) fails
+            fail unless pubshares[j] = derived
+
+    # Also establish authenticated delivery, ceremony binding,
+    # and agreement on the final commitment through the application.
+    fail unless the distribution requirements are satisfied
+    return private (id, secshare) and
+           public (n, t, derived_thresh_pk, pubshares, vss_commitment)</code></pre>
+<p>If <em>pubshares</em> was omitted, the accepted public record may
+omit it; the complete list MAY subsequently be derived from the
+commitment using <em>DerivePubshareFromCommitment</em> for each
+identifier. Any supplied individual public share MUST likewise match its
+derived value. A failed check MUST NOT be repaired by changing a share,
+identifier, evaluation point, commitment, or supplied public key.</p>
+<h3 id="completion-and-failure-handling">Completion and Failure
+Handling</h3>
+<p>A ceremony completes only after dealer-side checks succeed, final
+shares are delivered, and every designated participant accepts its share
+under the same final commitment. If any participant rejects or fails to
+establish agreement, the ceremony MUST NOT be declared successful.</p>
+<p>An application MAY start a new attempt. It MUST NOT silently remove
+or replace a participant, change <em>n</em> or <em>t</em>, combine
+material from different attempts, or use partial output to complete the
+original ceremony. Failed and superseded material MUST NOT be used for
+signing.</p>
+<p>After successful completion the dealer MUST delete secret state that
+is no longer required: initial and final secrets, coefficients, copies
+of participant shares, secret sampling material, and temporary or
+serialized copies. Secret state MUST remain confidential while it exists
+and MUST NOT be logged, persisted, exposed through diagnostics, or sent
+to others except as required for share delivery. Subsequent signing MUST
+NOT depend on retained dealer secrets.</p>
+<p>Logical deletion means the implementation no longer intentionally
+retains or uses these values. Implementations SHOULD minimize secret
+lifetimes and copies and use secure-memory and zeroization facilities
+where available. Public state MAY be retained with its integrity and
+ceremony association protected.</p>
+<h3 id="use-with-bip-445">Use with BIP 445</h3>
+<p>A signing session selects <em>u</em> distinct participants, with
+<em>1 ≤ t ≤ u ≤ n ≤ 128</em>, and uses their original identifiers,
+accepted secret shares, corresponding public shares, and common
+threshold public key. Long-term material MUST NOT be altered except by
+this specification’s transformation or applicable BIP 445 algorithms.
+Signing-context validation does not replace participant acceptance.</p>
+<p><a href="https://github.com/siv2r/bip-frost-signing">BIP 445</a>
+represents public key material as <em>Threshold Info</em> and uses a
+<em>Session Context</em> for signing. The participant limit in this
+proposal follows its security requirement of <em>n ≤ 128</em>.</p>
+<p>The output <em>thresh_pk</em> is a 33-byte plain public key. The word
+<em>plain</em> describes its representation, not whether it has been
+transformed. It is not a serialized Taproot witness program. The
+unresolved Taproot-safety issue is stated in <a
+href="#taproot-safety-transformation">Taproot-Safety
+Transformation</a>.</p>
+<p>Applications MAY use the final key as a Taproot internal key and
+apply further tweaks through BIP 445 and <a
+href="https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki">BIP
+341</a>. These signing-time tweaks do not modify the long-term shares.
+X-only interpretation and parity handling follow BIP 340, BIP 341, and
+BIP 445. A script-tree tweak MUST include the applicable Merkle root; an
+output without a spendable script path follows BIP 341’s no-script-path
+construction.</p>
+<h2 id="rationale">Rationale</h2>
+<h3 id="trusted-dealer-and-verifiable-sharing">Trusted Dealer and
+Verifiable Sharing</h3>
+<p>A trusted dealer provides a simple setup when a deployment already
+accepts a party with access to the complete secret. Distributed key
+generation is the alternative when that trust is unacceptable. Feldman
+commitments allow each participant to check its share and independently
+derive the public material, but do not prove honest randomness or
+erasure. A proof of knowledge used in a DKG protocol would not remove
+the dealer’s knowledge of the secret in this trust model.</p>
+<h3 id="identifiers-and-encodings">Identifiers and Encodings</h3>
+<p>The <em>id + 1</em> mapping combines zero-based protocol identifiers
+with the distinct, nonzero evaluation points required by Shamir sharing.
+Using zero itself would disclose the constant coefficient to participant
+zero. Compressed points preserve the parity information needed by BIP
+445; extended encoding also represents the zero coefficients permitted
+by RFC 9591. Canonical parsing prevents different encodings from
+representing the same accepted value.</p>
+<h3 id="key-generation-tweak">Key-Generation Tweak</h3>
+<p>BIP 445 requires a Taproot-safe threshold key to prevent hidden
+script paths from bypassing the threshold policy. Applying a common
+additive tweak to the constant term, shares, and commitments preserves
+their algebraic relationship. That correctness property is shown below;
+it does not resolve the parity question recorded in the specification.
+Application-level output tweaking remains a separate operation.</p>
+<h2 id="correctness">Correctness</h2>
+<p>For final coefficients <em>b<sub>j</sub></em> and commitments
+<em>B<sub>j</sub> = b<sub>j</sub>G</em>, linearity gives:</p>
+<blockquote>
+<p><em>f<sub>final</sub>(x<sub>id</sub>)G =
+Σ<sub>j=0</sub><sup>t-1</sup> x<sub>id</sub><sup>j</sup>B<sub>j</sub> =
+P<sub>id</sub></em>.</p>
+</blockquote>
+<p>This is the Feldman equation checked by <em>VerifySecshare</em>. The
+transformation <em>f<sub>final</sub>(x) = f(x) + tau</em> adds <em>tau
+G</em> to the constant commitment and every participant public point,
+preserving the equation.</p>
+<p>For any set <em>S</em> of at least <em>t</em> distinct participant
+identifiers, define the Lagrange coefficient at zero:</p>
+<blockquote>
+<p><em>lambda<sub>i</sub> = ∏<sub>j ∈ S, j ≠ i</sub> x<sub>j</sub> /
+(x<sub>j</sub> - x<sub>i</sub>) mod q</em>.</p>
+</blockquote>
+<p>All denominators are nonzero because <em>x<sub>i</sub> = i + 1</em>
+are distinct. Since <em>f<sub>final</sub></em> has degree at most <em>t
+- 1</em>, interpolation gives:</p>
+<blockquote>
+<p><em>b<sub>0</sub> = Σ<sub>i ∈ S</sub> lambda<sub>i</sub>
+secshare<sub>i</sub></em>,</p>
+<p><em>B<sub>0</sub> = Σ<sub>i ∈ S</sub> lambda<sub>i</sub>
+P<sub>i</sub></em>.</p>
+</blockquote>
+<p>Thus the selected public shares reconstruct <em>thresh_pk =
+cbytes(B<sub>0</sub>)</em> using BIP 445’s identifier convention. For
+<em>t = 1</em>, the polynomial is constant and all participant shares
+equal <em>b<sub>0</sub></em>.</p>
+<h2 id="security-considerations">Security Considerations</h2>
+<h3 id="dealer-trust-and-randomness">Dealer Trust and Randomness</h3>
+<p>The dealer knows the complete secret and all shares. A malicious or
+compromised dealer can compromise the key regardless of <em>t</em>.
+Deployments that prohibit any single party from learning the secret MUST
+use distributed key generation instead.</p>
+<p>Share verification establishes consistency with the accepted
+commitment. It cannot establish unbiased randomness, confidentiality,
+exclusive delivery, or erasure. Predictable coefficients can undermine
+threshold security while passing every algebraic check. The public
+deterministic tweak does not protect a known or guessable imported
+secret.</p>
+<p>Feldman commitments are not information-theoretically hiding: they
+expose public structure and permit checking coefficient guesses.
+Recovering a high-entropy scalar from its point relies on the hardness
+of the secp256k1 discrete logarithm problem. In particular, allowing a
+zero leading coefficient means the configured <em>t</em> is not a proof
+that a malicious dealer chose a polynomial of degree exactly <em>t -
+1</em>.</p>
+<h3 id="share-protection-and-commitment-agreement">Share Protection and
+Commitment Agreement</h3>
+<p>Accepted shares are long-term signing secrets and MUST remain
+confidential. For honestly generated material, collecting <em>t</em>
+distinct shares permits reconstruction; loss of more than <em>n - t</em>
+shares prevents threshold signing without an external recovery
+mechanism. A <em>1-of-n</em> configuration gives every participant the
+complete secret.</p>
+<p>A dealer can send individually valid shares under different
+commitments. The common-view requirement therefore matters independently
+of local verification and authenticated delivery. Shares from different
+commitments or ceremonies MUST NOT be combined.</p>
+<h3 id="erasure-and-implementation-security">Erasure and Implementation
+Security</h3>
+<p>Dealer erasure reduces the exposure period but cannot undo earlier
+disclosure. High-level runtimes, swap, crash dumps, storage, compilers,
+and hardware may retain residual copies; this does not remove the
+logical deletion requirement.</p>
+<p>Operations on secret scalars SHOULD use mature implementations
+designed to resist timing and other relevant side channels, and SHOULD
+avoid secret-dependent control flow or memory access where practical.
+Pseudocode describes functional behavior and MUST NOT be treated as
+demonstrating constant-time execution, fault resistance, or secure
+memory handling.</p>
+<h3 id="taproot-and-signing-validation">Taproot and Signing
+Validation</h3>
+<p>The key-generation tweak is intended to address hidden script paths,
+subject to the review issue above. It does not make a malicious dealer
+safe: that dealer can already spend using the complete secret.
+Participants receive the final commitment, which alone does not prove
+how the dealer constructed the initial point or applied the tweak.</p>
+<p>BIP 445 validation checks functional relationships needed for
+signing. It does not establish secure randomness, confidential delivery,
+agreement on commitments, or dealer erasure. Implementations MUST
+perform this specification’s acceptance and distribution checks
+independently.</p>
+<h2 id="backward-compatibility">Backward Compatibility</h2>
+<p>This proposal adds a key-generation procedure and changes no Bitcoin
+consensus rules, network protocol, wallet format, or BIP 445 signing
+algorithm. No consensus deployment mechanism is required.</p>
+<p>Other key-generation conventions MUST NOT be assumed interoperable.
+In particular, identifier mapping, point encoding, the key-generation
+transformation, and the supported BIP 445 parameter range must agree.
+Importing an existing secret generally changes its public key and is not
+a procedure for preserving an existing output key.</p>
+<h2 id="test-vectors">Test Vectors</h2>
+<p>The <a
+href="bip-frost-trusted-dealer-test-vectors.json">deterministic test
+vectors</a> provide successful and failing cases. Scalars and points use
+the encodings above, represented as hexadecimal byte strings. Test
+coefficients are for verification, not production generation.</p>
+<p>A successful vector SHOULD include <em>n</em>, <em>t</em>, initial
+coefficients and commitments, <em>tau</em>, final coefficients and
+commitments, <em>vss_commitment</em>, <em>thresh_pk</em>, and each
+participant’s identifier, share, and public share. It MUST permit
+checking the transformation, Feldman equation, and threshold-key
+derivation. Failure vectors SHOULD identify the failing operation and
+failure class; identical error messages are not required.</p>
+<p>Coverage SHOULD include <em>1-of-1</em>, a nontrivial threshold such
+as <em>2-of-3</em>, <em>t = n</em>, imported secrets, zero non-constant
+coefficients, and reconstruction from multiple signing subsets. Failure
+coverage SHOULD include invalid imported secrets and scalar encodings,
+malformed commitments, an infinity constant commitment, zero final
+shares, invalid identifiers, and tampered shares or commitments.</p>
+<p>Implementations SHOULD cross-check the underlying Shamir and Feldman
+arithmetic against RFC 9591 where directly comparable, mapping RFC
+evaluation point <em>x</em> to <em>id = x - 1</em>. Final outputs differ
+because this proposal additionally transforms the sharing.</p>
+<h2 id="reference-implementation">Reference Implementation</h2>
+<p>The <a href="python/trusted_dealer_ref/trusted_dealer_ref.py">Python
+reference implementation</a> implements the deterministic construction
+and participant checks. Its <a
+href="python/trusted_dealer_ref/test_trusted_dealer_ref.py">algorithm
+tests</a> and <a
+href="python/trusted_dealer_ref/test_test_vectors.py">vector tests</a>
+exercise generation, verification, and reconstruction. The Python
+generation entry point takes <em>(t, n, seckey)</em>, while the
+pseudocode names its inputs <em>(n, t, seckey)</em>.</p>
+<p>The specification is normative. The Python implementation currently
+permits participant counts above 128; its parameter validation must be
+tightened to conform to this draft. A further difference remains in
+randomized failure handling: the Python wrapper retries with a new
+initial secret after a Taproot-safety failure when no secret was
+imported; the algorithm above fails that operation. The deterministic
+implementation and vectors use the additive transformation specified
+here.</p>
+<p>The reference implementation is for demonstration and
+interoperability testing. It is not constant-time and does not provide
+reliable secret-memory erasure. Passing its tests does not establish
+production security or resolve the Taproot-safety review issue.</p>
+<h2 id="acknowledgments">Acknowledgments</h2>
+<p>We thank Jesse Posner for his mentorship, feedback, and FROST-BIP340
+implementation, and Sivaram Dhakshinamoorthy for <a
+href="https://github.com/siv2r/bip-frost-signing">BIP 445</a> and its
+trusted-dealer example. We also thank the authors and contributors of
+RFC 9591, BIP 327, and BIP 341, whose work provides the construction,
+notation, and Taproot conventions used in this proposal.</p>
+</body>
+</html>
