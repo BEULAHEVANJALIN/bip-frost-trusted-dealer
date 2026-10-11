@@ -67,8 +67,6 @@ Successful key generation produces:
 
 The dealer's output contains all shares for distribution; each participant receives only its own. Public data requires integrity and association with the ceremony, but not confidentiality. The VSS commitment is used for key-generation verification and is not an input to signing.
 
-For ''t = 1'', every participant holds the complete final secret. This includes ''n = 1'' and provides no threshold secrecy.
-
 === Cryptographic Domain and Notation ===
 
 This specification uses the secp256k1 group and scalar field described by [https://datatracker.ietf.org/doc/html/rfc9591#section-6.5 RFC 9591 Section 6.5]. It does not adopt that RFC's signing algorithms; signing is specified by BIP 445.
