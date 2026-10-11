@@ -47,7 +47,7 @@ This proposal does not define signing, nonce generation, share refresh or repair
 
 Key generation takes a participant count ''n'', a threshold ''t'', and optionally an initial secret ''seckey''. The parameters MUST satisfy ''1 ≤ t ≤ n ≤ 128'', matching [https://github.com/siv2r/bip-frost-signing BIP 445].
 
-Participant identifiers are the integers ''id = 0, ..., n - 1''. Participant ''id'' has the nonzero Shamir evaluation point ''x<sub>id</sub> = id + 1''. Implementations MUST NOT use ''id'' itself as the evaluation point or renumber participants when selecting a signing set.
+Participant identifiers are the integers ''id = 0, ..., n - 1''. Participant ''id'' has the nonzero Shamir evaluation point ''x<sub>id</sub> = id + 1''. Implementations MUST NOT use ''id'' itself as the evaluation point or renumber participants when selecting a signing set. When serialized, ''id'' uses exactly four unsigned big-endian bytes, as in BIP 445.
 
 Successful key generation produces:
 
@@ -67,52 +67,24 @@ Successful key generation produces:
 
 The dealer's output contains all shares for distribution; each participant receives only its own. Public data requires integrity and association with the ceremony, but not confidentiality. The VSS commitment is used for key-generation verification and is not an input to signing.
 
-=== Cryptographic Domain and Notation ===
+=== Notation ===
 
-This specification uses the secp256k1 group and scalar field described by [https://datatracker.ietf.org/doc/html/rfc9591#section-6.5 RFC 9591 Section 6.5]. It does not adopt that RFC's signing algorithms; signing is specified by BIP 445.
+This specification uses the secp256k1 group, scalar arithmetic, and serialization functions defined in [https://github.com/siv2r/bip-frost-signing#notation BIP 445's Notation section]. In particular, ''G'', ''inf_point'', ''cbytes'', ''cpoint'', ''cbytes_ext'', ''cpoint_ext'', ''xbytes'', ''scalar_to_bytes'', ''scalar_from_bytes_checked'', and ''scalar_from_bytes_nonzero_checked'' have the meanings specified there. These definitions, including their encoding lengths and validation rules, are normative here.
 
-Let ''G'' be the standard secp256k1 generator, ''inf_point'' the group identity, and ''q'' the prime order of ''G'':
+We write ''q'' for the group order called ''ord'' in BIP 445. All scalar arithmetic is modulo ''q''; inversion requires a nonzero scalar. ''Scalar(x)'' converts an integer satisfying ''0 ≤ x < q'' to a scalar. Lists in this document are zero-indexed, slices exclude the upper bound, ''||'' concatenates byte strings, and ''None'' denotes an omitted optional input.
 
-:''q = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141''.
-
-All scalar arithmetic is modulo ''q'', and inversion is defined only for nonzero scalars. ''aP'' denotes scalar multiplication and ''P + Q'' group addition. ''Scalar(x)'' converts an integer in ''0 ≤ x < q'' to a scalar. Lists are zero-indexed, slices exclude the upper bound, ''||'' concatenates byte strings, and ''None'' denotes an omitted optional input.
-
-Write the initial polynomial and commitments as:
+Write the initial polynomial and Feldman commitments as:
 
 :''f(x) = Σ<sub>j=0</sub><sup>t-1</sup> a<sub>j</sub>x<sup>j</sup>'',
 :''A<sub>j</sub> = a<sub>j</sub>G''.
 
 Use ''b<sub>j</sub>'', ''B<sub>j</sub>'', and ''f<sub>final</sub>'' for the corresponding values after the mandatory key-generation transformation. Non-constant coefficients MAY be zero, including the highest coefficient, so the polynomial has degree at most ''t - 1''.
 
-=== Encodings ===
+Parsers MUST reject incorrect lengths and noncanonical encodings. Imported secrets and final shares MUST use the nonzero scalar parser and MUST NOT be repaired by reduction, hashing, truncation, clamping, or another transformation. Explicit transformations of already valid scalars are separate from parsing.
 
-All integer encodings are unsigned and big-endian. Parsers MUST reject an incorrect length or a noncanonical encoding.
+''thresh_pk'' and participant public shares MUST use ordinary compressed encodings of non-infinity points. They need not have even Y; signing-time parity adjustment follows BIP 445.
 
-{| class="wikitable"
-! Value or operation !! Encoding and validation
-|-
-| ''scalar_to_bytes(s)'' || Exactly 32 bytes encoding ''0 ≤ s < q''.
-|-
-| ''scalar_from_bytes_checked(b)'' || Parse exactly 32 bytes; fail if the integer is at least ''q''.
-|-
-| ''scalar_from_bytes_nonzero_checked(b)'' || As above, additionally rejecting zero. Used for imported secrets and final secret shares.
-|-
-| ''cbytes(P)'', ''cpoint(b)'' || Exactly 33 bytes: ''0x02 || X'' for even Y or ''0x03 || X'' for odd Y, with a 32-byte X coordinate. Parsing requires canonical coordinates and a valid non-infinity secp256k1 point.
-|-
-| ''cbytes_ext(P)'', ''cpoint_ext(b)'' || Ordinary compressed encoding for non-infinity points; exactly 33 zero bytes for ''inf_point''. All other encodings fail.
-|-
-| ''xbytes(P)'' || The 32-byte X coordinate of a non-infinity point, equal to ''cbytes(P)[1:33]''.
-|-
-| Participant identifier || Exactly four bytes encoding ''id''; it must also satisfy ''0 ≤ id < n'' for the ceremony.
-|-
-| ''vss_commitment'' || ''cbytes_ext(B<sub>0</sub>) || ... || cbytes_ext(B<sub>t-1</sub>)'', exactly ''33t'' bytes in coefficient order.
-|}
-
-''B<sub>0</sub>'' MUST NOT be infinity. A non-constant commitment MAY be infinity, representing a zero coefficient. Extended encodings MUST NOT permit infinity as a threshold public key or participant public share. Commitment elements MUST NOT be reordered, omitted, or duplicated.
-
-Invalid imported secrets and final shares MUST be rejected, not reduced modulo ''q'', hashed, truncated, clamped, incremented, or otherwise repaired. Explicit transformations of already valid scalars are separate from parsing.
-
-Compressed public keys preserve Y parity. X-only encoding discards it, and BIP 340 interprets that encoding as the even-Y point. Final public shares and ''thresh_pk'' are full points and need not have even Y. Any signing-time parity adjustment follows BIP 445.
+''vss_commitment'' uses the layout specified in [[#Parsing a VSS Commitment|Parsing a VSS Commitment]].
 
 === Randomness and Secret Import ===
 
@@ -148,6 +120,12 @@ ParticipantEvaluationPoint(id, n):
 </pre>
 
 === Parsing a VSS Commitment ===
+
+The final commitment is serialized in coefficient order as:
+
+:''vss_commitment = cbytes_ext(B<sub>0</sub>) || ... || cbytes_ext(B<sub>t-1</sub>)''.
+
+It MUST contain exactly ''33t'' bytes. ''B<sub>0</sub>'' MUST NOT be infinity; non-constant commitments MAY be infinity, encoded as 33 zero bytes by ''cbytes_ext''. Commitment elements MUST NOT be reordered, omitted, or duplicated. The extended encoding does not permit infinity in an ordinary public key.
 
 <pre>
 ParseVSSCommitment(vss_commitment, t):
@@ -418,7 +396,7 @@ Other key-generation conventions MUST NOT be assumed interoperable. In particula
 
 == Test Vectors ==
 
-The [[bip-frost-trusted-dealer-test-vectors.json|deterministic test vectors]] provide successful and failing cases. Scalars and points use the encodings above, represented as hexadecimal byte strings. Test coefficients are for verification, not production generation.
+The [[bip-frost-trusted-dealer-test-vectors.json|deterministic test vectors]] provide successful and failing cases. Scalars and points use the encodings specified in [[#Notation|Notation]] and [[#Parsing a VSS Commitment|Parsing a VSS Commitment]], represented as hexadecimal byte strings. Test coefficients are for verification, not production generation.
 
 A successful vector SHOULD include ''n'', ''t'', initial coefficients and commitments, ''tau'', final coefficients and commitments, ''vss_commitment'', ''thresh_pk'', and each participant's identifier, share, and public share. It MUST permit checking the transformation, Feldman equation, and threshold-key derivation. Failure vectors SHOULD identify the failing operation and failure class; identical error messages are not required.
 
