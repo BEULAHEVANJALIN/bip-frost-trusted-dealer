@@ -104,7 +104,7 @@ Algorithm ''PolynomialEvaluate(coeffs, x)'':
 * Inputs:
 ** The coefficient list ''coeffs'': scalars in ascending coefficient order
 ** The evaluation point ''x'': a scalar
-* Fail if ''len(coeffs) = 0''.
+* Fail if ''len(coeffs) == 0''.
 * Let ''value = Scalar(0)''.
 * For each ''coeff'' in ''coeffs'', in reverse order:
 ** Let ''value = value · x + coeff''.
@@ -114,7 +114,7 @@ Algorithm ''PolynomialEvaluatePoint(commitments, x)'':
 * Inputs:
 ** The commitment list ''commitments'': group elements in ascending coefficient order
 ** The evaluation point ''x'': a scalar
-* Fail if ''len(commitments) = 0''.
+* Fail if ''len(commitments) == 0''.
 * Let ''result = inf_point''.
 * For each ''A'' in ''commitments'', in reverse order:
 ** Let ''result = x · result + A''.
@@ -141,11 +141,11 @@ Algorithm ''ParseVSSCommitment(vss_commitment, t)'':
 ** The serialized commitment ''vss_commitment'': a byte array containing the coefficient commitments in order
 ** The threshold ''t'': an integer
 * Fail if ''t < 1''.
-* Fail unless ''len(vss_commitment) = 33 · t''.
+* Fail unless ''len(vss_commitment) == 33 · t''.
 * Let ''commitments'' be an empty list.
 * For ''j = 0, ..., t - 1'':
 ** Let ''B = cpoint_ext(vss_commitment[33 · j : 33 · (j + 1)])''; fail if parsing fails.
-** Fail if ''j = 0'' and ''B = inf_point''.
+** Fail if ''j == 0'' and ''B == inf_point''.
 ** Append ''B'' to ''commitments''.
 * Return ''commitments''.
 
@@ -160,7 +160,7 @@ where the tag is encoded as ASCII. The hash input is the initial point's X coord
 Algorithm ''TaprootSafetyTweak(P)'':
 * Input:
 ** The initial constant commitment ''P'': a group element
-* Fail if ''P = inf_point''.
+* Fail if ''P == inf_point''.
 * Let ''h = hash<sub>TapTweak</sub>(xbytes(P))''.
 * Let ''v'' be the unsigned big-endian integer represented by ''h''.
 * Fail if ''v ≥ q''.
@@ -170,15 +170,15 @@ Algorithm ''ApplyTaprootSafety(coeffs, commitments)'':
 * Inputs:
 ** The initial coefficient list ''coeffs'': scalars in ascending coefficient order
 ** The initial commitment list ''commitments'': group elements satisfying ''commitments[j] = coeffs[j] · G'' at each index ''j''
-* Fail unless ''len(coeffs) = len(commitments) ≥ 1''.
-* Fail if ''commitments[0] = inf_point''.
+* Fail unless ''len(coeffs) == len(commitments)'' and ''len(commitments) ≥ 1''.
+* Fail if ''commitments[0] == inf_point''.
 * Let ''tau = TaprootSafetyTweak(commitments[0])''; fail if that fails.
 * Let ''final_coeffs'' be a copy of ''coeffs'' and ''final_commitments'' be a copy of ''commitments''.
 * Let ''final_coeffs[0] = coeffs[0] + tau''.
 * Let ''final_commitments[0] = commitments[0] + tau · G''.
-* Fail if ''final_coeffs[0] = Scalar(0)''.
-* Fail if ''final_commitments[0] = inf_point''.
-* Fail unless ''final_commitments[0] = final_coeffs[0] · G''.
+* Fail if ''final_coeffs[0] == Scalar(0)''.
+* Fail if ''final_commitments[0] == inf_point''.
+* Fail unless ''final_commitments[0] == final_coeffs[0] · G''.
 * Return ''(final_coeffs, final_commitments, tau)''.
 
 Thus ''f<sub>final</sub>(x) = f(x) + tau'', ''B<sub>0</sub> = A<sub>0</sub> + tau G'', and ''B<sub>j</sub> = A<sub>j</sub>'' for ''j > 0''. Every share is shifted by the same scalar. This transformation uses the initial full point without first normalizing it to even Y.
@@ -196,7 +196,7 @@ Algorithm ''DerivePubshareFromCommitment(id, n, t, vss_commitment)'':
 * Let ''x = ParticipantEvaluationPoint(id, n)''; fail if that fails.
 * Let ''commitments = ParseVSSCommitment(vss_commitment, t)''; fail if that fails.
 * Let ''P = PolynomialEvaluatePoint(commitments, x)''.
-* Fail if ''P = inf_point''.
+* Fail if ''P == inf_point''.
 * Return ''cbytes(P)''.
 
 Algorithm ''ThreshPubkeyFromCommitment(t, vss_commitment)'':
@@ -216,7 +216,7 @@ Algorithm ''VerifySecshare(id, n, t, secshare, vss_commitment)'':
 * Let ''d = scalar_from_bytes_nonzero_checked(secshare)''; return ''False'' if parsing fails.
 * Let ''x = ParticipantEvaluationPoint(id, n)''; return ''False'' if that fails.
 * Let ''commitments = ParseVSSCommitment(vss_commitment, t)''; return ''False'' if that fails.
-* Return ''True'' if ''d · G = PolynomialEvaluatePoint(commitments, x)'', otherwise return ''False''.
+* Return ''True'' if ''d · G == PolynomialEvaluatePoint(commitments, x)'', otherwise return ''False''.
 
 Verification compares group elements. Since ''d'' is nonzero, an infinity expected point fails verification without needing to serialize it. Public-share derivation and secret-share verification validate ''n'' and ''t'', but these helpers do not establish transport authentication or commitment agreement; participants MUST perform the complete acceptance procedure below.
 
@@ -236,7 +236,7 @@ Algorithm ''TrustedDealerKeygen(n, t, seckey)'':
 * Let ''coeffs = [a<sub>0</sub>]''.
 * For ''j = 1, ..., t - 1'':
 ** Append an independently uniformly sampled scalar to ''coeffs''.
-* Return ''TrustedDealerKeygenInternal(coeffs, n)''.
+* Return ''TrustedDealerKeygenInternal(coeffs, t, n)''.
 
 If the internal invocation fails because a '''final''' participant share is zero and ''t > 1'', the dealer MAY resample the entire set of non-constant coefficients and retry while retaining ''a0''. No individual share may be repaired. Any other failure, including a Taproot-safety failure, causes the current operation to fail whether the initial secret was generated or imported. An imported secret MUST NOT be modified to repair failure.
 
@@ -244,15 +244,15 @@ If the internal invocation fails because a '''final''' participant share is zero
 
 ''TrustedDealerKeygenInternal(coeffs, n)'' takes a non-empty list of canonical scalars in ascending coefficient order and produces the final serialized material. It MUST NOT sample randomness. An implementation SHOULD expose an equivalent deterministic operation for testing; production generation MUST NOT substitute fixed test coefficients for secure randomness.
 
-Internal Algorithm ''TrustedDealerKeygenInternal(coeffs, n)'':
+Internal Algorithm ''TrustedDealerKeygenInternal(coeffs,t, n)'':
 * Inputs:
 ** The initial coefficient list ''coeffs'': canonical scalars in ascending coefficient order
 ** The participant count ''n'': an integer
 * Let ''t = len(coeffs)''.
 * Fail unless ''1 ≤ t ≤ n ≤ 128''.
-* Fail if ''coeffs[0] = Scalar(0)''.
+* Fail if ''coeffs[0] == Scalar(0)''.
 * Let ''commitments'' be the list of points ''coeff · G'' for each ''coeff'' in ''coeffs'', in order.
-* Fail if ''commitments[0] = inf_point''.
+* Fail if ''commitments[0] == inf_point''.
 * Let ''(final_coeffs, final_commitments, tau) = ApplyTaprootSafety(coeffs, commitments)''; fail if that fails.
 * Let ''vss_commitment'' be the concatenation of ''cbytes_ext(B)'' for each ''B'' in ''final_commitments'', in order.
 * Let ''thresh_pk = cbytes(final_commitments[0])''.
@@ -260,13 +260,13 @@ Internal Algorithm ''TrustedDealerKeygenInternal(coeffs, n)'':
 * For ''id = 0, ..., n - 1'':
 ** Let ''x = ParticipantEvaluationPoint(id, n)''.
 ** Let ''d = PolynomialEvaluate(final_coeffs, x)''.
-** Fail if ''d = Scalar(0)''.
+** Fail if ''d == Scalar(0)''.
 ** Let ''P = d · G''.
-** Fail if ''P = inf_point''.
-** Fail unless ''P = PolynomialEvaluatePoint(final_commitments, x)''.
+** Fail if ''P == inf_point''.
+** Fail unless ''P == PolynomialEvaluatePoint(final_commitments, x)''.
 ** Append ''scalar_to_bytes(d)'' to ''secshares''.
 ** Append ''cbytes(P)'' to ''pubshares''.
-* Fail unless ''ThreshPubkeyFromCommitment(t, vss_commitment) = thresh_pk''.
+* Fail unless ''ThreshPubkeyFromCommitment(t, vss_commitment) == thresh_pk''.
 * For ''id = 0, ..., n - 1'':
 ** Fail unless ''VerifySecshare(id, n, t, secshares[id], vss_commitment)'' returns ''True''.
 * Return ''(vss_commitment, thresh_pk, pubshares, secshares)''.
@@ -301,13 +301,13 @@ Algorithm ''ParticipantKeyAccept(id, n, t, secshare, vss_commitment, thresh_pk, 
 * Let ''derived_pubshare = DerivePubshareFromCommitment(id, n, t, vss_commitment)''; fail if that fails.
 * If ''thresh_pk'' is supplied:
 ** Parse ''cpoint(thresh_pk)''; fail if parsing fails.
-** Fail unless ''thresh_pk = derived_thresh_pk''.
+** Fail unless ''thresh_pk == derived_thresh_pk''.
 * If ''pubshares'' is supplied:
-** Fail unless ''len(pubshares) = n''.
+** Fail unless ''len(pubshares) == n''.
 ** For ''j = 0, ..., n - 1'':
 *** Let ''derived = DerivePubshareFromCommitment(j, n, t, vss_commitment)''; fail if that fails.
 *** Parse ''cpoint(pubshares[j])''; fail if parsing fails.
-*** Fail unless ''pubshares[j] = derived''.
+*** Fail unless ''pubshares[j] == derived''.
 * Establish authenticated delivery, ceremony binding, and agreement on the final commitment through the application; fail unless the [[#Secret-Share Distribution|distribution requirements]] are satisfied.
 * Return the private record ''(id, secshare)'' and the public record ''(n, t, derived_thresh_pk, pubshares, vss_commitment)''.
 
