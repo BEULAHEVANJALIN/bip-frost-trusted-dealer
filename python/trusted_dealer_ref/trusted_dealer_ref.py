@@ -79,7 +79,7 @@ def validate_params(t: int, n: int) -> None:
 
 
 def random_scalar() -> Scalar:
-    """Sample uniformly from {0, ..., q - 1} using rejection sampling."""
+    """Sample uniformly from {0, ..., ord - 1} using rejection sampling."""
     while True:
         try:
             return Scalar.from_bytes_checked(secrets.token_bytes(32))
@@ -89,7 +89,7 @@ def random_scalar() -> Scalar:
 
 
 def random_nonzero_scalar() -> Scalar:
-    """Sample uniformly from {1, ..., q - 1}."""
+    """Sample uniformly from {1, ..., ord - 1}."""
     while True:
         s = random_scalar()
         if s != Scalar(0):
@@ -257,7 +257,7 @@ def taproot_safety_tweak(
 
         tweak = int(hash_TapTweak(xbytes(P)))
 
-    and fails if the hash represents an integer >= q.
+    and fails if the hash represents an integer >= ord.
 
     This is the key-generation transformation used here. It must not
     be confused with BIP 445 ApplyTweak(..., is_xonly_t=True), whose
@@ -274,7 +274,7 @@ def taproot_safety_tweak(
     )
 
     try:
-        # This implements BIP341's t < q check.
+        # This implements BIP341's t < ord check.
         #
         # Zero itself is permitted.
         return Scalar.from_bytes_checked(tweak_bytes)

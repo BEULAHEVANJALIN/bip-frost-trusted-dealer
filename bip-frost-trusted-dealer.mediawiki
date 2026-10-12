@@ -69,9 +69,9 @@ The dealer's output contains all shares for distribution; each participant recei
 
 === Notation ===
 
-This specification uses the secp256k1 group, scalar arithmetic, and serialization functions defined in [https://github.com/siv2r/bip-frost-signing#notation BIP 445's Notation section]. In particular, ''G'', ''inf_point'', ''cbytes'', ''cpoint'', ''cbytes_ext'', ''cpoint_ext'', ''xbytes'', ''scalar_to_bytes'', ''scalar_from_bytes_checked'', and ''scalar_from_bytes_nonzero_checked'' have the meanings specified there. These definitions, including their encoding lengths and validation rules, are normative here.
+This specification uses the secp256k1 group, scalar arithmetic, and serialization functions defined in [https://github.com/siv2r/bip-frost-signing#notation BIP 445's Notation section]. In particular, ''ord'', ''G'', ''inf_point'', ''cbytes'', ''cpoint'', ''cbytes_ext'', ''cpoint_ext'', ''xbytes'', ''scalar_to_bytes'', ''scalar_from_bytes_checked'', and ''scalar_from_bytes_nonzero_checked'' have the meanings specified there. These definitions, including their encoding lengths and validation rules, are normative here.
 
-We write ''q'' for the group order called ''ord'' in BIP 445. All scalar arithmetic is modulo ''q''; inversion requires a nonzero scalar. ''Scalar(x)'' converts an integer satisfying ''0 ≤ x < q'' to a scalar. Lists in this document are zero-indexed, slices exclude the upper bound, ''||'' concatenates byte strings, and ''None'' denotes an omitted optional input.
+All scalar arithmetic is modulo ''ord''; inversion requires a nonzero scalar. ''Scalar(x)'' converts an integer satisfying ''0 ≤ x < ord'' to a scalar. Lists in this document are zero-indexed, slices exclude the upper bound, ''||'' concatenates byte strings, and ''None'' denotes an omitted optional input.
 
 Write the initial polynomial and Feldman commitments as:
 
@@ -88,9 +88,9 @@ Parsers MUST reject incorrect lengths and noncanonical encodings. Imported secre
 
 === Randomness and Secret Import ===
 
-The dealer MUST use cryptographically secure randomness. A generated initial secret is sampled uniformly from ''{1, ..., q - 1}''. Each non-constant coefficient is sampled independently and uniformly from ''{0, ..., q - 1}''.
+The dealer MUST use cryptographically secure randomness. A generated initial secret is sampled uniformly from ''{1, ..., ord - 1}''. Each non-constant coefficient is sampled independently and uniformly from ''{0, ..., ord - 1}''.
 
-Random scalar generation SHOULD follow [https://datatracker.ietf.org/doc/html/rfc9591#appendix-D RFC 9591 Appendix D]. Rejection sampling of 32 random bytes is one suitable method. Simply reducing a random 32-byte integer modulo ''q'' MUST NOT be used as a uniform sampler. Zero candidates for a nonzero secret are discarded and sampled again.
+Random scalar generation SHOULD follow [https://datatracker.ietf.org/doc/html/rfc9591#appendix-D RFC 9591 Appendix D]. Rejection sampling of 32 random bytes is one suitable method. Simply reducing a random 32-byte integer modulo ''ord'' MUST NOT be used as a uniform sampler. Zero candidates for a nonzero secret are discarded and sampled again.
 
 An imported ''seckey'' MUST be a canonical nonzero scalar derived from at least 32 bytes of entropy, as required by RFC 9591 Appendix C for this scalar size. Its supplier is responsible for its entropy and confidentiality; these cannot be established from the encoding. Importing a secret does not repair weak generation or prior disclosure.
 
@@ -155,7 +155,7 @@ The dealer MUST apply the transformation below before distributing shares. Defin
 
 :''hash<sub>TapTweak</sub>(m) = SHA256(SHA256("TapTweak") || SHA256("TapTweak") || m)'',
 
-where the tag is encoded as ASCII. The hash input is the initial point's X coordinate without a Merkle root. Its integer value MUST be less than ''q''; it is not reduced modulo ''q''.
+where the tag is encoded as ASCII. The hash input is the initial point's X coordinate without a Merkle root. Its integer value MUST be less than ''ord''; it is not reduced modulo ''ord''.
 
 Algorithm ''TaprootSafetyTweak(P)'':
 * Input:
@@ -163,7 +163,7 @@ Algorithm ''TaprootSafetyTweak(P)'':
 * Fail if ''P == inf_point''.
 * Let ''h = hash<sub>TapTweak</sub>(xbytes(P))''.
 * Let ''v'' be the unsigned big-endian integer represented by ''h''.
-* Fail if ''v ≥ q''.
+* Fail if ''v ≥ ord''.
 * Return ''Scalar(v)''.
 
 Algorithm ''ApplyTaprootSafety(coeffs, commitments)'':
