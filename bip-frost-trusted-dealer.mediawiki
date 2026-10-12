@@ -343,24 +343,9 @@ A trusted dealer provides a simple setup when a deployment already accepts a par
 
 The ''id + 1'' mapping combines zero-based protocol identifiers with the distinct, nonzero evaluation points required by Shamir sharing. Using zero itself would disclose the constant coefficient to participant zero. Compressed points preserve the parity information needed by BIP 445; extended encoding also represents the zero coefficients permitted by RFC 9591. Canonical parsing prevents different encodings from representing the same accepted value.
 
-== Correctness ==
+=== Preservation of Share Consistency ===
 
-For final coefficients ''b<sub>j</sub>'' and commitments ''B<sub>j</sub> = b<sub>j</sub>G'', linearity gives:
-
-:''f<sub>final</sub>(x<sub>id</sub>)G = Σ<sub>j=0</sub><sup>t-1</sup> x<sub>id</sub><sup>j</sup>B<sub>j</sub> = P<sub>id</sub>''.
-
-This is the Feldman equation checked by ''VerifySecshare''. The transformation ''f<sub>final</sub>(x) = f(x) + tau'' adds ''tau G'' to the constant commitment and every participant public point, preserving the equation.
-
-For any set ''S'' of at least ''t'' distinct participant identifiers, define the Lagrange coefficient at zero:
-
-:''λ<sub>i</sub> = ∏<sub>j ∈ S, j ≠ i</sub> x<sub>j</sub> / (x<sub>j</sub> - x<sub>i</sub>) mod q''.
-
-All denominators are nonzero because ''x<sub>i</sub> = i + 1'' are distinct. Since ''f<sub>final</sub>'' has degree at most ''t - 1'', interpolation gives:
-
-:''b<sub>0</sub> = Σ<sub>i ∈ S</sub> λ<sub>i</sub> secshare<sub>i</sub>'',
-:''B<sub>0</sub> = Σ<sub>i ∈ S</sub> λ<sub>i</sub> P<sub>i</sub>''.
-
-Thus the selected public shares reconstruct ''thresh_pk = cbytes(B<sub>0</sub>)'' using BIP 445's identifier convention. For ''t = 1'', the polynomial is constant and all participant shares equal ''b<sub>0</sub>''.
+Adding ''tau'' to the polynomial's constant coefficient adds ''tau'' to every secret share and ''tau G'' to the corresponding public points, preserving Feldman verification. The final polynomial still has degree at most ''t - 1'', so any ''t'' distinct participants' shares reconstruct its constant coefficient, and their public shares reconstruct the threshold public key. The underlying Shamir and Feldman constructions are described in [https://www.rfc-editor.org/rfc/rfc9591.html#appendix-C RFC 9591 Appendix C].
 
 == Security Considerations ==
 
