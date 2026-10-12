@@ -98,16 +98,18 @@ The imported scalar is the '''initial''' constant coefficient. The mandatory tra
 
 === Polynomial Evaluation ===
 
-''PolynomialEvaluate'' and ''PolynomialEvaluatePoint'' use Horner's method on non-empty lists in ascending coefficient order. Group evaluation permits infinity elements.
+''PolynomialEvaluate'' and ''PolynomialEvaluatePoint'' use Horner's method. Input lists are stored in ascending coefficient order, with the constant coefficient first, and MUST be non-empty. Evaluation processes them in reverse, from the highest-degree coefficient to the constant coefficient. For example, ''[a<sub>0</sub>, a<sub>1</sub>, a<sub>2</sub>]'' evaluates to ''(a<sub>2</sub>x + a<sub>1</sub>)x + a<sub>0</sub>''. This avoids computing powers of ''x'' explicitly. The same recurrence applies to group commitments, which MAY include infinity elements.
 
 <pre>
 PolynomialEvaluate(coeffs, x):
+    fail if len(coeffs) = 0
     value = Scalar(0)
     for coeff in reverse(coeffs):
         value = value * x + coeff
     return value
 
 PolynomialEvaluatePoint(commitments, x):
+    fail if len(commitments) = 0
     result = inf_point
     for A in reverse(commitments):
         result = x * result + A
@@ -173,8 +175,6 @@ ApplyTaprootSafety(coeffs, commitments):
 </pre>
 
 Thus ''f<sub>final</sub>(x) = f(x) + tau'', ''B<sub>0</sub> = A<sub>0</sub> + tau G'', and ''B<sub>j</sub> = A<sub>j</sub>'' for ''j > 0''. Every share is shifted by the same scalar. This transformation uses the initial full point without first normalizing it to even Y.
-
-'''Review issue:''' The additive transformation retained here matches the source draft's normative algorithms and deterministic reference implementation. For an odd-Y ''A<sub>0</sub>'', it differs from the [https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#constructing-and-spending-taproot-outputs BIP 341 no-script-path construction], which uses the even-Y lift of the internal key. Whether this transformation meets BIP 445's Taproot-safety requirement remains to be resolved; consistency of shares alone does not establish that property.
 
 === Public-Key Derivation and Share Verification ===
 
