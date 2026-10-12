@@ -236,7 +236,7 @@ Algorithm ''TrustedDealerKeygen(n, t, seckey)'':
 * Let ''coeffs = [a<sub>0</sub>]''.
 * For ''j = 1, ..., t - 1'':
 ** Append an independently uniformly sampled scalar to ''coeffs''.
-* Return ''TrustedDealerKeygenInternal(coeffs, t, n)''.
+* Return ''TrustedDealerKeygenInternal(coeffs, n)''.
 
 If the internal invocation fails because a '''final''' participant share is zero and ''t > 1'', the dealer MAY resample the entire set of non-constant coefficients and retry while retaining ''a0''. No individual share may be repaired. Any other failure, including a Taproot-safety failure, causes the current operation to fail whether the initial secret was generated or imported. An imported secret MUST NOT be modified to repair failure.
 
@@ -244,7 +244,7 @@ If the internal invocation fails because a '''final''' participant share is zero
 
 ''TrustedDealerKeygenInternal(coeffs, n)'' takes a non-empty list of canonical scalars in ascending coefficient order and produces the final serialized material. It MUST NOT sample randomness. An implementation SHOULD expose an equivalent deterministic operation for testing; production generation MUST NOT substitute fixed test coefficients for secure randomness.
 
-Internal Algorithm ''TrustedDealerKeygenInternal(coeffs,t, n)'':
+Internal Algorithm ''TrustedDealerKeygenInternal(coeffs, n)'':
 * Inputs:
 ** The initial coefficient list ''coeffs'': canonical scalars in ascending coefficient order
 ** The participant count ''n'': an integer
@@ -329,7 +329,7 @@ A signing session selects ''u'' distinct participants, with ''1 ≤ t ≤ u ≤ 
 
 [https://github.com/siv2r/bip-frost-signing BIP 445] represents public key material as ''Threshold Info'' and uses a ''Session Context'' for signing. The participant limit in this proposal follows its security requirement of ''n ≤ 128''.
 
-The output ''thresh_pk'' is a 33-byte plain public key. The word ''plain'' describes its representation, not whether it has been transformed. It is not a serialized Taproot witness program. The unresolved Taproot-safety issue is stated in [[#Taproot-Safety Transformation|Taproot-Safety Transformation]].
+The output ''thresh_pk'' is a 33-byte plain public key. The word ''plain'' describes its representation, not whether it has been transformed. It is not a serialized Taproot witness program.
 
 Applications MAY use the final key as a Taproot internal key and apply further tweaks through BIP 445 and [https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki BIP 341]. These signing-time tweaks do not modify the long-term shares. X-only interpretation and parity handling follow BIP 340, BIP 341, and BIP 445. A script-tree tweak MUST include the applicable Merkle root; an output without a spendable script path follows BIP 341's no-script-path construction.
 
@@ -343,10 +343,6 @@ A trusted dealer provides a simple setup when a deployment already accepts a par
 
 The ''id + 1'' mapping combines zero-based protocol identifiers with the distinct, nonzero evaluation points required by Shamir sharing. Using zero itself would disclose the constant coefficient to participant zero. Compressed points preserve the parity information needed by BIP 445; extended encoding also represents the zero coefficients permitted by RFC 9591. Canonical parsing prevents different encodings from representing the same accepted value.
 
-=== Key-Generation Tweak ===
-
-BIP 445 requires a Taproot-safe threshold key to prevent hidden script paths from bypassing the threshold policy. Applying a common additive tweak to the constant term, shares, and commitments preserves their algebraic relationship. That correctness property is shown below; it does not resolve the parity question recorded in the specification. Application-level output tweaking remains a separate operation.
-
 == Correctness ==
 
 For final coefficients ''b<sub>j</sub>'' and commitments ''B<sub>j</sub> = b<sub>j</sub>G'', linearity gives:
@@ -357,12 +353,12 @@ This is the Feldman equation checked by ''VerifySecshare''. The transformation '
 
 For any set ''S'' of at least ''t'' distinct participant identifiers, define the Lagrange coefficient at zero:
 
-:''lambda<sub>i</sub> = ∏<sub>j ∈ S, j ≠ i</sub> x<sub>j</sub> / (x<sub>j</sub> - x<sub>i</sub>) mod q''.
+:''<math>\lambda</math><sub>i</sub> = ∏<sub>j ∈ S, j ≠ i</sub> x<sub>j</sub> / (x<sub>j</sub> - x<sub>i</sub>) mod q''.
 
 All denominators are nonzero because ''x<sub>i</sub> = i + 1'' are distinct. Since ''f<sub>final</sub>'' has degree at most ''t - 1'', interpolation gives:
 
-:''b<sub>0</sub> = Σ<sub>i ∈ S</sub> lambda<sub>i</sub> secshare<sub>i</sub>'',
-:''B<sub>0</sub> = Σ<sub>i ∈ S</sub> lambda<sub>i</sub> P<sub>i</sub>''.
+:''b<sub>0</sub> = Σ<sub>i ∈ S</sub> <math>\lambda</math><sub>i</sub> secshare<sub>i</sub>'',
+:''B<sub>0</sub> = Σ<sub>i ∈ S</sub> <math>\lambda</math><sub>i</sub> P<sub>i</sub>''.
 
 Thus the selected public shares reconstruct ''thresh_pk = cbytes(B<sub>0</sub>)'' using BIP 445's identifier convention. For ''t = 1'', the polynomial is constant and all participant shares equal ''b<sub>0</sub>''.
 
