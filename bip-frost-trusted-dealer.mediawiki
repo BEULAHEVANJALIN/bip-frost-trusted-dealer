@@ -218,7 +218,7 @@ Algorithm ''VerifySecshare(id, n, t, secshare, vss_commitment)'':
 * Let ''commitments = ParseVSSCommitment(vss_commitment, t)''; return ''False'' if that fails.
 * Return ''True'' if ''d · G == PolynomialEvaluatePoint(commitments, x)'', otherwise return ''False''.
 
-Verification compares group elements. Since ''d'' is nonzero, an infinity expected point fails verification without needing to serialize it. Public-share derivation and secret-share verification validate ''n'' and ''t'', but these helpers do not establish transport authentication or commitment agreement; participants MUST perform the complete acceptance procedure below.
+Verification compares group elements. Since ''d'' is nonzero, an infinity expected point fails verification without needing to serialize it. Participants MUST also perform [[#Participant Key Acceptance|Participant Key Acceptance]].
 
 === Trusted Dealer Key Generation ===
 
@@ -325,9 +325,9 @@ Logical deletion means the implementation no longer intentionally retains or use
 
 === Use with BIP 445 ===
 
-A signing session selects ''u'' distinct participants, with ''1 ≤ t ≤ u ≤ n ≤ 128'', and uses their original identifiers, accepted secret shares, corresponding public shares, and common threshold public key. Long-term material MUST NOT be altered except by this specification's transformation or applicable BIP 445 algorithms. Signing-context validation does not replace participant acceptance.
+A signing session selects ''u'' distinct participants, with ''1 ≤ t ≤ u ≤ n ≤ 128'', and uses their original identifiers, accepted secret shares, corresponding public shares, and common threshold public key. Long-term material MUST NOT be altered except by this specification's transformation or applicable BIP 445 algorithms. See [[#Taproot and Signing Validation|Taproot and Signing Validation]] for the limits of signing-context validation.
 
-[https://github.com/siv2r/bip-frost-signing BIP 445] represents public key material as ''Threshold Info'' and uses a ''Session Context'' for signing. The participant limit in this proposal follows its security requirement of ''n ≤ 128''.
+[https://github.com/siv2r/bip-frost-signing BIP 445] represents public key material as ''Threshold Info'' and uses a ''Session Context'' for signing.
 
 The output ''thresh_pk'' is a 33-byte plain public key. The word ''plain'' describes its representation, not whether it has been transformed. It is not a serialized Taproot witness program.
 
@@ -337,7 +337,7 @@ Applications MAY use the final key as a Taproot internal key and apply further t
 
 === Trusted Dealer and Verifiable Sharing ===
 
-A trusted dealer provides a simple setup when a deployment already accepts a party with access to the complete secret. Distributed key generation is the alternative when that trust is unacceptable. Feldman commitments allow each participant to check its share and independently derive the public material, but do not prove honest randomness or erasure. A proof of knowledge used in a DKG protocol would not remove the dealer's knowledge of the secret in this trust model.
+Feldman commitments provide verifiable sharing without an interactive distributed key-generation protocol. A proof of knowledge would not remove the dealer's knowledge of the secret; the trust limitations are described in [[#Dealer Trust and Randomness|Dealer Trust and Randomness]].
 
 === Identifiers and Encodings ===
 
@@ -371,7 +371,7 @@ Operations on secret scalars SHOULD use mature implementations designed to resis
 
 === Taproot and Signing Validation ===
 
-The key-generation tweak is intended to address hidden script paths, subject to the review issue above. It does not make a malicious dealer safe: that dealer can already spend using the complete secret. Participants receive the final commitment, which alone does not prove how the dealer constructed the initial point or applied the tweak.
+The key-generation tweak is intended to address hidden script paths. It does not make a malicious dealer safe: that dealer can already spend using the complete secret. Participants receive the final commitment, which alone does not prove how the dealer constructed the initial point or applied the tweak.
 
 BIP 445 validation checks functional relationships needed for signing. It does not establish secure randomness, confidential delivery, agreement on commitments, or dealer erasure. Implementations MUST perform this specification's acceptance and distribution checks independently.
 
@@ -379,7 +379,7 @@ BIP 445 validation checks functional relationships needed for signing. It does n
 
 This proposal adds a key-generation procedure and changes no Bitcoin consensus rules, network protocol, wallet format, or BIP 445 signing algorithm. No consensus deployment mechanism is required.
 
-Other key-generation conventions MUST NOT be assumed interoperable. In particular, identifier mapping, point encoding, the key-generation transformation, and the supported BIP 445 parameter range must agree. Importing an existing secret generally changes its public key and is not a procedure for preserving an existing output key.
+Other key-generation conventions MUST NOT be assumed interoperable. In particular, identifier mapping, point encoding, the key-generation transformation, and the supported BIP 445 parameter range must agree. For the effect of importing an existing secret, see [[#Randomness and Secret Import|Randomness and Secret Import]].
 
 == Test Vectors ==
 
@@ -395,11 +395,11 @@ Implementations SHOULD cross-check the underlying Shamir and Feldman arithmetic 
 
 The [[python/trusted_dealer_ref/trusted_dealer_ref.py|Python reference implementation]] implements the deterministic construction and participant checks. Its [[python/trusted_dealer_ref/test_trusted_dealer_ref.py|algorithm tests]] and [[python/trusted_dealer_ref/test_test_vectors.py|vector tests]] exercise generation, verification, and reconstruction. The Python generation entry point takes ''(t, n, seckey)'', while the specification algorithm names its inputs ''(n, t, seckey)''.
 
-The specification is normative. The Python implementation enforces ''1 ≤ t ≤ n ≤ 128'' for generation and participant checks. Its randomized wrapper retries zero final shares by resampling non-constant coefficients while retaining the initial secret; Taproot-safety failures abort the operation. The deterministic implementation and vectors use the additive transformation specified here.
+The specification is normative. The Python randomized wrapper implements the optional zero-final-share retry described in [[#Trusted Dealer Key Generation|Trusted Dealer Key Generation]].
 
 The Python ''participant_key_accept'' function performs the local cryptographic checks and returns the participant identifier, secret share, threshold public key, own public share, and VSS commitment. The application retains ''n'' and ''t'', derives or retains the complete public-share list as needed, and establishes authenticated distribution and commitment agreement before declaring acceptance as required by [[#Participant Key Acceptance|Participant Key Acceptance]].
 
-The reference implementation is for demonstration and interoperability testing. It is not constant-time and does not provide reliable secret-memory erasure. Passing its tests does not establish production security or resolve the Taproot-safety review issue.
+The reference implementation is for demonstration and interoperability testing. It is not constant-time and does not provide reliable secret-memory erasure. Passing its tests does not establish production security.
 
 == Acknowledgements ==
 
