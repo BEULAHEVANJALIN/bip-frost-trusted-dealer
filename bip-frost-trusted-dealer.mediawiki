@@ -353,12 +353,12 @@ This is the Feldman equation checked by ''VerifySecshare''. The transformation '
 
 For any set ''S'' of at least ''t'' distinct participant identifiers, define the Lagrange coefficient at zero:
 
-:''&lambda<sub>i</sub> = ∏<sub>j ∈ S, j ≠ i</sub> x<sub>j</sub> / (x<sub>j</sub> - x<sub>i</sub>) mod q''.
+:''λ<sub>i</sub> = ∏<sub>j ∈ S, j ≠ i</sub> x<sub>j</sub> / (x<sub>j</sub> - x<sub>i</sub>) mod q''.
 
 All denominators are nonzero because ''x<sub>i</sub> = i + 1'' are distinct. Since ''f<sub>final</sub>'' has degree at most ''t - 1'', interpolation gives:
 
-:''b<sub>0</sub> = Σ<sub>i ∈ S</sub> &lambda<sub>i</sub> secshare<sub>i</sub>'',
-:''B<sub>0</sub> = Σ<sub>i ∈ S</sub> &lambda<sub>i</sub> P<sub>i</sub>''.
+:''b<sub>0</sub> = Σ<sub>i ∈ S</sub> λ<sub>i</sub> secshare<sub>i</sub>'',
+:''B<sub>0</sub> = Σ<sub>i ∈ S</sub> λ<sub>i</sub> P<sub>i</sub>''.
 
 Thus the selected public shares reconstruct ''thresh_pk = cbytes(B<sub>0</sub>)'' using BIP 445's identifier convention. For ''t = 1'', the polynomial is constant and all participant shares equal ''b<sub>0</sub>''.
 
