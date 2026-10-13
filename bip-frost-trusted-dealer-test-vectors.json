@@ -2,6 +2,56 @@
   "description": "BIP FROST Trusted Dealer Key Generation deterministic test vectors",
   "valid": [
     {
+      "name": "odd_y_initial_key",
+      "comment": "Odd-Y initial key requires negating all coefficients before tweaking.",
+      "n": 3,
+      "t": 3,
+      "initial_coefficients": [
+        "0000000000000000000000000000000000000000000000000000000000000006",
+        "0000000000000000000000000000000000000000000000000000000000000005",
+        "0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "initial_commitments": [
+        "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "000000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "taproot_safety_tweak": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5843",
+      "final_coefficients": [
+        "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba583d",
+        "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd036413c",
+        "0000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "final_commitments": [
+        "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "000000000000000000000000000000000000000000000000000000000000000000"
+      ],
+      "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4000000000000000000000000000000000000000000000000000000000000000000",
+      "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+      "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+      "participants": [
+        {
+          "id": 0,
+          "evaluation_point": 1,
+          "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+          "pubshare": "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd"
+        },
+        {
+          "id": 1,
+          "evaluation_point": 2,
+          "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5833",
+          "pubshare": "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e"
+        },
+        {
+          "id": 2,
+          "evaluation_point": 3,
+          "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba582e",
+          "pubshare": "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        }
+      ]
+    },
+    {
       "name": "1_of_1",
       "comment": "Basic deterministic 1-of-1 vector.",
       "n": 1,
@@ -20,6 +70,7 @@
         "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21"
       ],
       "vss_commitment": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21",
+      "original_pk": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
       "thresh_pk": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21",
       "participants": [
         {
@@ -53,6 +104,7 @@
         "02c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5"
       ],
       "vss_commitment": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d2102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+      "original_pk": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
       "thresh_pk": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21",
       "participants": [
         {
@@ -102,6 +154,7 @@
         "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc"
       ],
       "vss_commitment": "02418c46636d9e1a683f58e35b42336e776fdcc3b2d4e39e7a0bf1ab0716e3c5fa022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc",
+      "original_pk": "02f9308a019258c31049344f85f89d5229b531c845836f99b08601f113bce036f9",
       "thresh_pk": "02418c46636d9e1a683f58e35b42336e776fdcc3b2d4e39e7a0bf1ab0716e3c5fa",
       "participants": [
         {
@@ -147,6 +200,7 @@
         "000000000000000000000000000000000000000000000000000000000000000000"
       ],
       "vss_commitment": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3000000000000000000000000000000000000000000000000000000000000000000",
+      "original_pk": "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc",
       "thresh_pk": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3",
       "participants": [
         {
@@ -192,6 +246,7 @@
         "03c44d12c7065d812e8acf28d7cbb19f9011ecd9e9fdf281b0e6a3b5e87d22e7db"
       ],
       "vss_commitment": "0315cb9414c636c5a4158390ad76c3f66629c3b32d268ccddf3c603834c69b576203c44d12c7065d812e8acf28d7cbb19f9011ecd9e9fdf281b0e6a3b5e87d22e7db",
+      "original_pk": "02c44d12c7065d812e8acf28d7cbb19f9011ecd9e9fdf281b0e6a3b5e87d22e7db",
       "thresh_pk": "0315cb9414c636c5a4158390ad76c3f66629c3b32d268ccddf3c603834c69b5762",
       "participants": [
         {
@@ -259,7 +314,7 @@
       "t": 2,
       "initial_coefficients": [
         "0000000000000000000000000000000000000000000000000000000000000011",
-        "fffd80913cb1712fa40a17cd2cd5a59272e981c4b9f37935e6a4e7935428465c"
+        "00027f6ec34e8ed05bf5e832d32a5a6c47c55b21f5552705d92d76f97c0dfac3"
       ],
       "expected_failure": "zero_final_share"
     }

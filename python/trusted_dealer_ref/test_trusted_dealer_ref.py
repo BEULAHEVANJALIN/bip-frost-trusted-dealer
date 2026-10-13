@@ -118,7 +118,7 @@ def test_maximum_participant_count():
     assert td.participant_evaluation_point(127, 128) == s(128)
     accepted = td.participant_key_accept(
         127, 128, 2, output.secshares[127], output.vss_commitment,
-        output.thresh_pk, output.pubshares,
+        output.original_pk, output.thresh_pk, output.pubshares,
     )
     assert accepted.pubshare == output.pubshares[127]
     with pytest.raises(ValueError):
@@ -146,6 +146,7 @@ def test_participant_limit_at_public_entry_points(n, monkeypatch):
     with pytest.raises(ValueError):
         td.participant_key_accept(
             0, n, 1, output.secshares[0], output.vss_commitment,
+            output.original_pk, output.thresh_pk,
         )
     sampler.assert_not_called()
 
@@ -156,7 +157,8 @@ def test_taproot_safety_failure_aborts(imported, failure, monkeypatch):
     a0 = s(17)
     sampler = Mock(side_effect=[a0])
     monkeypatch.setattr(td, "random_nonzero_scalar", sampler)
-    tweak = SECP256K1_ORDER if failure == "out_of_range_tweak" else SECP256K1_ORDER - 17
+    normalized_secret = a0 if (a0 * G).has_even_y() else -a0
+    tweak = SECP256K1_ORDER if failure == "out_of_range_tweak" else int.from_bytes((-normalized_secret).to_bytes(), "big")
     hasher = Mock(return_value=tweak.to_bytes(32, "big"))
     monkeypatch.setattr(td, "tagged_hash", hasher)
     with pytest.raises(td.TaprootSafetyError):
@@ -168,10 +170,11 @@ def test_taproot_safety_failure_aborts(imported, failure, monkeypatch):
 @pytest.mark.parametrize("imported", [False, True])
 def test_zero_final_share_retries_all_nonconstant_coefficients(imported, monkeypatch):
     a0 = s(17)
-    final_constant = a0 + td.taproot_safety_tweak(a0 * G)
+    sign = s(1) if (a0 * G).has_even_y() else -s(1)
+    final_constant = sign * a0 + td.taproot_safety_tweak(a0 * G)
     # The first polynomial has final f(1) = 0; the second succeeds.
     bad_a2 = s(5)
-    bad_a1 = s(0) - final_constant - bad_a2
+    bad_a1 = -sign * final_constant - bad_a2
     expected = td.trusted_dealer_keygen_internal([a0, s(1), s(2)], 3)
     initial_sampler = Mock(side_effect=[a0])
     coefficient_sampler = Mock(side_effect=[bad_a1, bad_a2, s(1), s(2)])
@@ -345,9 +348,10 @@ def test_two_of_three_keygen():
 #
 
 
-def test_taproot_safety_transformation():
+@pytest.mark.parametrize("a0", [6, 7])
+def test_taproot_safety_transformation(a0):
     initial_coeffs = [
-        s(7),
+        s(a0),
         s(11),
         s(13),
     ]
@@ -361,6 +365,7 @@ def test_taproot_safety_transformation():
         initial_commitments[0]
     )
 
+    sign = s(1) if initial_commitments[0].has_even_y() else -s(1)
     transformed = td.apply_taproot_safety(
         initial_coeffs,
         initial_commitments,
@@ -372,32 +377,32 @@ def test_taproot_safety_transformation():
     assert transformed.tweak == tweak
 
     #
-    # b_0 = a_0 + tweak
+    # b_0 = sign*a_0 + tweak
     #
     assert (
         final_coeffs[0]
-        == initial_coeffs[0] + tweak
+        == sign * initial_coeffs[0] + tweak
     )
 
     #
-    # b_j = a_j for j > 0
+    # b_j = sign*a_j for j > 0
     #
-    assert final_coeffs[1:] == initial_coeffs[1:]
+    assert final_coeffs[1:] == [sign * a for a in initial_coeffs[1:]]
 
     #
-    # B_0 = A_0 + tweak*G
+    # B_0 = sign*A_0 + tweak*G
     #
     assert (
         final_commitments[0]
-        == initial_commitments[0] + tweak * G
+        == sign * initial_commitments[0] + tweak * G
     )
 
     #
-    # B_j = A_j for j > 0
+    # B_j = sign*A_j for j > 0
     #
     assert (
         final_commitments[1:]
-        == initial_commitments[1:]
+        == [sign * A for A in initial_commitments[1:]]
     )
 
     #
@@ -410,9 +415,10 @@ def test_taproot_safety_transformation():
         assert commitment == coeff * G
 
 
-def test_final_share_is_initial_share_plus_tweak():
+@pytest.mark.parametrize("a0", [5, 6])
+def test_final_share_is_signed_initial_share_plus_tweak(a0):
     initial_coeffs = [
-        s(5),
+        s(a0),
         s(9),
         s(12),
     ]
@@ -422,6 +428,7 @@ def test_final_share_is_initial_share_plus_tweak():
         for coeff in initial_coeffs
     ]
 
+    sign = s(1) if initial_commitments[0].has_even_y() else -s(1)
     transformed = td.apply_taproot_safety(
         initial_coeffs,
         initial_commitments,
@@ -442,7 +449,7 @@ def test_final_share_is_initial_share_plus_tweak():
 
         assert (
             final_share
-            == initial_share + transformed.tweak
+            == sign * initial_share + transformed.tweak
         )
 
 
@@ -470,7 +477,7 @@ def test_keygen_outputs_final_tweaked_commitment():
 
     assert (
         final_commitments[0]
-        == initial_A0 + tweak * G
+        == (initial_A0 if initial_A0.has_even_y() else -initial_A0) + tweak * G
     )
 
     assert (
@@ -501,7 +508,7 @@ def test_zero_nonconstant_coefficient_is_valid():
     )
 
     #
-    # Taproot safety modifies only the constant term.
+    # The parity adjustment preserves zero nonconstant coefficients.
     # Therefore B_1 remains:
     #
     #     0 * G = infinity
@@ -531,7 +538,7 @@ def test_zero_final_share_is_rejected():
     Deliberately choose a_1 so participant 0 obtains:
 
         f_final(1)
-          = a_0 + tweak + a_1
+          = sign*(a_0 + a_1) + tweak
           = 0.
 
     This tests that rejection happens after the
@@ -545,16 +552,17 @@ def test_zero_final_share_is_rejected():
         A_0
     )
 
-    final_constant = a_0 + tweak
+    sign = s(1) if A_0.has_even_y() else -s(1)
+    final_constant = sign * a_0 + tweak
 
     # participant 0 has x = 1
     #
     # Choose:
     #
-    #     a_1 = -(a_0 + tweak)
+    #     a_1 = -sign*final_constant
     #
     # so final f(1) = 0.
-    a_1 = s(0) - final_constant
+    a_1 = -sign * final_constant
 
     with pytest.raises(td.ZeroFinalShareError):
         td.trusted_dealer_keygen_internal(
@@ -920,6 +928,7 @@ def test_participant_accepts_valid_material():
         t=2,
         secshare=output.secshares[1],
         vss_commitment=output.vss_commitment,
+        original_pk=output.original_pk,
         thresh_pk=output.thresh_pk,
         pubshares=output.pubshares,
     )
@@ -954,6 +963,7 @@ def test_participant_rejects_wrong_threshold_pubkey():
             t=2,
             secshare=output1.secshares[0],
             vss_commitment=output1.vss_commitment,
+            original_pk=output1.original_pk,
             thresh_pk=output2.thresh_pk,
         )
 
@@ -988,5 +998,7 @@ def test_participant_rejects_wrong_pubshare_list():
             t=2,
             secshare=output1.secshares[0],
             vss_commitment=output1.vss_commitment,
+            original_pk=output1.original_pk,
+            thresh_pk=output1.thresh_pk,
             pubshares=bad_pubshares,
         )

@@ -81,6 +81,7 @@ def make_valid_vector(
             for P in safety.final_commitments
         ],
         "vss_commitment": output.vss_commitment.hex(),
+        "original_pk": output.original_pk.hex(),
         "thresh_pk": output.thresh_pk.hex(),
         "participants": participants,
     }
@@ -91,7 +92,7 @@ def make_zero_final_share_vector() -> dict[str, Any]:
     Construct a deterministic polynomial whose FINAL share for
     participant 0 is zero.
 
-        f_final(1) = a_0 + tweak + a_1 = 0
+        f_final(1) = sign*(a_0 + a_1) + tweak = 0
     """
     a_0 = Scalar(17)
 
@@ -99,7 +100,8 @@ def make_zero_final_share_vector() -> dict[str, Any]:
         a_0 * G
     )
 
-    a_1 = Scalar(0) - (a_0 + tweak)
+    sign = Scalar(1) if (a_0 * G).has_even_y() else -Scalar(1)
+    a_1 = -a_0 - sign * tweak
 
     return {
         "name": "zero_final_share",
@@ -181,6 +183,12 @@ def make_invalid_vectors() -> list[dict[str, Any]]:
 
 def build_vectors() -> dict[str, Any]:
     valid = [
+        make_valid_vector(
+            name="odd_y_initial_key",
+            comment="Odd-Y initial key requires negating all coefficients before tweaking.",
+            n=3,
+            coeff_ints=[6, 5, 0],
+        ),
         make_valid_vector(
             name="1_of_1",
             comment="Basic deterministic 1-of-1 vector.",

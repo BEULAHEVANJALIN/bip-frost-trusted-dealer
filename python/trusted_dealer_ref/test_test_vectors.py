@@ -298,11 +298,12 @@ def test_final_coefficients(vector):
     #
     # Bitcoin-specific Taproot-safety transformation:
     #
-    #     b_0 = a_0 + tweak
-    #     b_j = a_j          for j > 0
+    #     b_0 = sign*a_0 + tweak
+    #     b_j = sign*a_j     for j > 0
     #
-    assert final[0] == initial[0] + tweak
-    assert final[1:] == initial[1:]
+    sign = Scalar(1) if (initial[0] * G).has_even_y() else -Scalar(1)
+    assert final[0] == sign * initial[0] + tweak
+    assert final[1:] == [sign * a for a in initial[1:]]
 
     # The final threshold secret must be nonzero.
     assert final[0] != Scalar(0)
@@ -334,14 +335,15 @@ def test_final_commitments(vector):
     )
 
     #
-    #     B_0 = A_0 + tweak*G
+    #     B_0 = sign*A_0 + tweak*G
     #
-    assert final[0] == initial[0] + tweak * G
+    sign = Scalar(1) if initial[0].has_even_y() else -Scalar(1)
+    assert final[0] == sign * initial[0] + tweak * G
 
     #
-    #     B_j = A_j for j > 0
+    #     B_j = sign*A_j for j > 0
     #
-    assert final[1:] == initial[1:]
+    assert final[1:] == [sign * A for A in initial[1:]]
 
     #
     # Every final commitment must also satisfy:
@@ -852,12 +854,26 @@ def test_zero_final_share_vector_is_constructed_correctly():
     # Participant 0 evaluates at x = 1:
     #
     #   f_final(1)
-    #       = a_0 + tweak + a_1
+    #       = sign*(a_0 + a_1) + tweak
     #       = 0
     #
-    assert (
-        a_0
-        + tweak
-        + a_1
-        == Scalar(0)
-    )
+    sign = Scalar(1) if (a_0 * G).has_even_y() else -Scalar(1)
+    assert sign * (a_0 + a_1) + tweak == Scalar(0)
+
+
+@pytest.mark.parametrize("vector", load_vectors()["valid"], ids=lambda v: v["name"])
+def test_vector_public_key_delivery_and_acceptance(vector):
+    original_pk = bytes.fromhex(vector["original_pk"])
+    assert original_pk == bytes.fromhex(vector["initial_commitments"][0])
+    coeffs = [scalar_from_hex(value) for value in vector["initial_coefficients"]]
+    output = td.trusted_dealer_keygen_internal(coeffs, vector["n"])
+    assert output.original_pk == original_pk
+    for participant in vector["participants"]:
+        accepted = td.participant_key_accept(
+            participant["id"], vector["n"], vector["t"],
+            bytes.fromhex(participant["secshare"]),
+            bytes.fromhex(vector["vss_commitment"]),
+            original_pk, bytes.fromhex(vector["thresh_pk"]),
+        )
+        assert accepted.original_pk == original_pk
+        assert accepted.pubshare.hex() == participant["pubshare"]

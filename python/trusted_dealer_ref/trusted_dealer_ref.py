@@ -43,7 +43,8 @@ class TaprootSafetyError(ValueError):
 
 
 class DealerOutput(NamedTuple):
-    # Public key-generation output.
+    # Public key-generation output: original_pk is A0; thresh_pk is A1.
+    original_pk: PlainPk
     vss_commitment: VSSCommitment
     thresh_pk: PlainPk
     pubshares: List[PlainPk]
@@ -59,6 +60,7 @@ class TaprootSafetyResult(NamedTuple):
 
 
 class ParticipantAcceptedKeyMaterial(NamedTuple):
+    original_pk: PlainPk
     participant_id: int
     secshare: bytes
     thresh_pk: PlainPk
@@ -259,9 +261,8 @@ def taproot_safety_tweak(
 
     and fails if the hash represents an integer >= ord.
 
-    This is the key-generation transformation used here. It must not
-    be confused with BIP 445 ApplyTweak(..., is_xonly_t=True), whose
-    signing-time semantics additionally perform even-Y normalization.
+    No Merkle root is included. The caller normalizes the initial
+    point to even Y before adding tweak*G, as required by BIP 341.
     """
     if initial_thresh_point.infinity:
         raise TaprootSafetyError(
@@ -290,24 +291,11 @@ def apply_taproot_safety(
     commitments: List[GE],
 ) -> TaprootSafetyResult:
     """
-    Transform the initial sharing
+    Apply BIP 341's no-script-path tweak to the sharing.
 
-        f(x) = a_0 + a_1*x + ...
-
-    into the final BIP-445-compatible sharing
-
-        f_final(x) = f(x) + tweak.
-
-    Therefore:
-
-        b_0 = a_0 + tweak
-        b_j = a_j                    for j > 0
-
-        B_0 = A_0 + tweak*G
-        B_j = A_j                    for j > 0
-
-    and every final participant share is shifted by exactly the same
-    tweak.
+    Set g = 1 for an even-Y initial constant commitment, otherwise -1.
+    Then f_final(x) = g*f(x) + tweak, with b_0 = g*a_0 + tweak and
+    b_j = g*a_j for j > 0. Apply the same sign to all commitments.
     """
     if len(coeffs) == 0:
         raise ValueError(
@@ -341,7 +329,8 @@ def apply_taproot_safety(
 
     tweak = taproot_safety_tweak(commitments[0])
 
-    final_coeffs = list(coeffs)
+    sign = Scalar(1) if commitments[0].has_even_y() else -Scalar(1)
+    final_coeffs = [sign * coeff for coeff in coeffs]
     final_coeffs[0] = final_coeffs[0] + tweak
 
     if final_coeffs[0] == Scalar(0):
@@ -350,7 +339,7 @@ def apply_taproot_safety(
             "a zero threshold secret."
         )
 
-    final_commitments = list(commitments)
+    final_commitments = [sign * commitment for commitment in commitments]
     final_commitments[0] = (
         final_commitments[0] + tweak * G
     )
@@ -501,7 +490,7 @@ def trusted_dealer_keygen(
     The mandatory Taproot-safety transformation changes the final
     threshold secret to:
 
-        b_0 = a_0 + tweak
+        b_0 = g*a_0 + tweak, where g normalizes a_0*G to even Y
 
     so the final thresh_pk generally differs from seckey*G.
 
@@ -596,9 +585,9 @@ def trusted_dealer_keygen_internal(
     #
     # Initial Feldman commitment
     #
-    # A_j = a_j * G
+    # C_j = a_j * G
     #
-    # Nonconstant A_j values may be infinity when a_j == 0.
+    # Nonconstant C_j values may be infinity when a_j == 0.
     #
     initial_commitments = [
         coeff * G
@@ -725,6 +714,7 @@ def trusted_dealer_keygen_internal(
         pubshares.append(pubshare)
 
     return DealerOutput(
+        PlainPk(initial_commitments[0].to_bytes_compressed()),
         vss_commitment,
         thresh_pk,
         pubshares,
@@ -743,16 +733,21 @@ def participant_key_accept(
     t: int,
     secshare: bytes,
     vss_commitment: bytes,
-    thresh_pk: Optional[bytes] = None,
+    original_pk: bytes,
+    thresh_pk: bytes,
     pubshares: Optional[List[bytes]] = None,
 ) -> ParticipantAcceptedKeyMaterial:
     """
     Validate participant key material before it is used by BIP 445.
 
+    original_pk (A0) and thresh_pk (A1) are required compressed keys.
+    Verify A1 = even_y(A0) + TapTweak(x(A0))*G and its equality to the
+    final constant commitment before accepting the share.
+
     Transport authentication, confidentiality, ceremony binding, and
     the requirement that all participants have the same view of the
-    VSS commitment are application/protocol responsibilities and
-    cannot be established by this local function alone.
+    original key, tweaked key, and VSS commitment are application
+    responsibilities and cannot be established by this local function alone.
     """
     validate_params(t, n)
 
@@ -794,30 +789,29 @@ def participant_key_accept(
         )
     )
 
-    #
-    # A separately supplied thresh_pk is redundant.
-    # The final VSS commitment remains authoritative.
-    #
-    if thresh_pk is not None:
-        try:
-            supplied_thresh_point = (
-                GE.from_bytes_compressed(
-                    thresh_pk
-                )
-            )
-        except ValueError as e:
-            raise ValueError(
-                "The supplied threshold public key is invalid."
-            ) from e
-
-        if (
-            supplied_thresh_point.to_bytes_compressed()
-            != derived_thresh_pk
-        ):
-            raise ValueError(
-                "The supplied threshold public key does not "
-                "match the VSS commitment."
-            )
+    # Both public keys are mandatory. Verify the BIP 341 relation and
+    # bind the supplied tweaked key to the authoritative final commitment.
+    if len(original_pk) != 33 or len(thresh_pk) != 33:
+        raise ValueError("Both public keys must have length 33.")
+    initial_point = GE.from_bytes_compressed(original_pk)
+    supplied_thresh_point = GE.from_bytes_compressed(thresh_pk)
+    normalized_point = (
+        initial_point if initial_point.has_even_y() else -initial_point
+    )
+    tweak = taproot_safety_tweak(initial_point)
+    expected_thresh_point = normalized_point + tweak * G
+    if expected_thresh_point.infinity:
+        raise TaprootSafetyError(
+            "The Taproot-safety transformation produced infinity."
+        )
+    if supplied_thresh_point != expected_thresh_point:
+        raise ValueError(
+            "The supplied public keys do not satisfy the BIP 341 tweak."
+        )
+    if thresh_pk != derived_thresh_pk:
+        raise ValueError(
+            "The supplied threshold public key does not match the VSS commitment."
+        )
 
     #
     # If a complete public-share list is supplied, verify every entry
@@ -862,6 +856,7 @@ def participant_key_accept(
                 )
 
     return ParticipantAcceptedKeyMaterial(
+        original_pk=PlainPk(original_pk),
         participant_id=participant_id,
         secshare=secshare,
         thresh_pk=derived_thresh_pk,

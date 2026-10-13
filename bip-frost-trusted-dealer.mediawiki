@@ -56,7 +56,9 @@ Successful key generation produces:
 |-
 | ''n'', ''t'' || Participant count and threshold || Public
 |-
-| ''thresh_pk'' || 33-byte compressed threshold public key || Public
+| ''original_pk'' || 33-byte compressed original public key ''A0'' || Public
+|-
+| ''thresh_pk'' || 33-byte compressed tweaked threshold public key ''A1'' || Public
 |-
 | ''pubshares'' || ''n'' compressed public shares in identifier order || Public
 |-
@@ -69,20 +71,20 @@ The dealer's output contains all shares for distribution; each participant recei
 
 === Notation ===
 
-This specification uses the secp256k1 group, scalar arithmetic, and serialization functions defined in [https://github.com/siv2r/bip-frost-signing#notation BIP 445's Notation section]. In particular, ''ord'', ''G'', ''inf_point'', ''cbytes'', ''cpoint'', ''cbytes_ext'', ''cpoint_ext'', ''xbytes'', ''scalar_to_bytes'', ''scalar_from_bytes_checked'', and ''scalar_from_bytes_nonzero_checked'' have the meanings specified there. These definitions, including their encoding lengths and validation rules, are normative here.
+This specification uses the secp256k1 group, scalar arithmetic, and serialization functions defined in [https://github.com/siv2r/bip-frost-signing#notation BIP 445's Notation section]. In particular, ''ord'', ''G'', ''inf_point'', ''cbytes'', ''cpoint'', ''cbytes_ext'', ''cpoint_ext'', ''has_even_y'', ''xbytes'', ''scalar_to_bytes'', ''scalar_from_bytes_checked'', and ''scalar_from_bytes_nonzero_checked'' have the meanings specified there. These definitions, including their encoding lengths and validation rules, are normative here.
 
 All scalar arithmetic is modulo ''ord''; inversion requires a nonzero scalar. ''Scalar(x)'' converts an integer satisfying ''0 ≤ x < ord'' to a scalar. Lists in this document are zero-indexed, slices exclude the upper bound, ''||'' concatenates byte strings, and ''None'' denotes an omitted optional input.
 
 Write the initial polynomial and Feldman commitments as:
 
 :''f(x) = Σ<sub>j=0</sub><sup>t-1</sup> a<sub>j</sub>x<sup>j</sup>'',
-:''A<sub>j</sub> = a<sub>j</sub>G''.
+:''C<sub>j</sub> = a<sub>j</sub>G''.
 
-Use ''b<sub>j</sub>'', ''B<sub>j</sub>'', and ''f<sub>final</sub>'' for the corresponding values after the mandatory key-generation transformation. Non-constant coefficients MAY be zero, including the highest coefficient, so the polynomial has degree at most ''t - 1''.
+The original public point is ''A0 = C<sub>0</sub>'' and the tweaked public point is ''A1 = B<sub>0</sub>''; their compressed encodings are ''original_pk'' and ''thresh_pk''. Use ''b<sub>j</sub>'', ''B<sub>j</sub>'', and ''f<sub>final</sub>'' for the corresponding values after the mandatory key-generation transformation. Non-constant coefficients MAY be zero, including the highest coefficient, so the polynomial has degree at most ''t - 1''.
 
 Parsers MUST reject incorrect lengths and noncanonical encodings. Imported secrets and final shares MUST use the nonzero scalar parser and MUST NOT be repaired by reduction, hashing, truncation, clamping, or another transformation. Explicit transformations of already valid scalars are separate from parsing.
 
-''thresh_pk'' and participant public shares MUST use ordinary compressed encodings of non-infinity points. They need not have even Y; signing-time parity adjustment follows BIP 445.
+''original_pk'', ''thresh_pk'', and participant public shares MUST use ordinary compressed encodings of non-infinity points. They need not have even Y; signing-time parity adjustment follows BIP 445.
 
 ''vss_commitment'' uses the layout specified in [[#Parsing a VSS Commitment|Parsing a VSS Commitment]].
 
@@ -151,7 +153,7 @@ Algorithm ''ParseVSSCommitment(vss_commitment, t)'':
 
 === Taproot-Safety Transformation ===
 
-The dealer MUST apply the transformation below before distributing shares. Define the BIP 341 tagged hash by:
+The dealer MUST apply the no-script-path transformation specified in [https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#constructing-and-spending-taproot-outputs BIP 341] before distributing shares. The original point ''A0'' is normalized to its even-Y representative ''P'' before computing ''A1 = P + tau · G''. Define the tagged hash by:
 
 :''hash<sub>TapTweak</sub>(m) = SHA256(SHA256("TapTweak") || SHA256("TapTweak") || m)'',
 
@@ -173,15 +175,17 @@ Algorithm ''ApplyTaprootSafety(coeffs, commitments)'':
 * Fail unless ''len(coeffs) == len(commitments)'' and ''len(commitments) ≥ 1''.
 * Fail if ''commitments[0] == inf_point''.
 * Let ''tau = TaprootSafetyTweak(commitments[0])''; fail if that fails.
-* Let ''final_coeffs'' be a copy of ''coeffs'' and ''final_commitments'' be a copy of ''commitments''.
-* Let ''final_coeffs[0] = coeffs[0] + tau''.
-* Let ''final_commitments[0] = commitments[0] + tau · G''.
+* Let ''g = Scalar(1)'' if ''has_even_y(commitments[0])'', otherwise let ''g = -Scalar(1)''.
+* Let ''final_coeffs'' be the list of ''g · coeff'' for each ''coeff'' in ''coeffs'', in order.
+* Let ''final_commitments'' be the list of ''g · C'' for each ''C'' in ''commitments'', in order.
+* Let ''final_coeffs[0] = final_coeffs[0] + tau''.
+* Let ''final_commitments[0] = final_commitments[0] + tau · G''.
 * Fail if ''final_coeffs[0] == Scalar(0)''.
 * Fail if ''final_commitments[0] == inf_point''.
 * Fail unless ''final_commitments[0] == final_coeffs[0] · G''.
 * Return ''(final_coeffs, final_commitments, tau)''.
 
-Thus ''f<sub>final</sub>(x) = f(x) + tau'', ''B<sub>0</sub> = A<sub>0</sub> + tau G'', and ''B<sub>j</sub> = A<sub>j</sub>'' for ''j > 0''. Every share is shifted by the same scalar. This transformation uses the initial full point without first normalizing it to even Y.
+Thus ''f<sub>final</sub>(x) = g · f(x) + tau'', ''B<sub>0</sub> = g · C<sub>0</sub> + tau G'', and ''B<sub>j</sub> = g · C<sub>j</sub>'' for ''j > 0''. When ''A0'' has odd Y, every coefficient and commitment is negated before adding the tweak to the constant term. The final point ''A1'' is not normalized again; its full parity is retained for BIP 445 signing.
 
 === Public-Key Derivation and Share Verification ===
 
@@ -255,6 +259,7 @@ Internal Algorithm ''TrustedDealerKeygenInternal(coeffs, n)'':
 * Fail if ''commitments[0] == inf_point''.
 * Let ''(final_coeffs, final_commitments, tau) = ApplyTaprootSafety(coeffs, commitments)''; fail if that fails.
 * Let ''vss_commitment'' be the concatenation of ''cbytes_ext(B)'' for each ''B'' in ''final_commitments'', in order.
+* Let ''original_pk = cbytes(commitments[0])''.
 * Let ''thresh_pk = cbytes(final_commitments[0])''.
 * Let ''secshares'' and ''pubshares'' be empty lists.
 * For ''id = 0, ..., n - 1'':
@@ -269,29 +274,30 @@ Internal Algorithm ''TrustedDealerKeygenInternal(coeffs, n)'':
 * Fail unless ''ThreshPubkeyFromCommitment(t, vss_commitment) == thresh_pk''.
 * For ''id = 0, ..., n - 1'':
 ** Fail unless ''VerifySecshare(id, n, t, secshares[id], vss_commitment)'' returns ''True''.
-* Return ''(vss_commitment, thresh_pk, pubshares, secshares)''.
+* Return ''(original_pk, vss_commitment, thresh_pk, pubshares, secshares)''.
 
 All called operations MUST succeed. The lists are ordered by participant identifier. Only final shares are required to be nonzero: a zero evaluation of the initial polynomial does not itself cause failure. No initial, intermediate, or rejected sharing may be distributed as output.
 
 === Secret-Share Distribution ===
 
-After dealer-side validation, the dealer MUST deliver ''secshares[id]'' only to its intended participant over a mutually authenticated channel providing confidentiality and integrity. The share MUST be authenticated together with at least ''(n, t, id, vss_commitment)''. Retransmitting the same share to its intended participant is permitted.
+After dealer-side validation, the dealer MUST deliver ''secshares[id]'' only to its intended participant over a mutually authenticated channel providing confidentiality and integrity. Each participant MUST also receive ''original_pk'' (''A0''), ''thresh_pk'' (''A1''), and the final ''vss_commitment''. The share MUST be authenticated together with at least ''(n, t, id, original_pk, thresh_pk, vss_commitment)''. Retransmitting the same share to its intended participant is permitted.
 
 The application defines the transport and serialization of this context. It MAY additionally bind a ceremony identifier, transcript identifier, device identity, or network identity. A share from another ceremony MUST NOT be accepted merely because it uses the same participant identifier.
 
-All participants MUST establish a consistent view of the same final ''vss_commitment''. Its integrity and association with the delivered share MUST be protected. Authenticated point-to-point delivery alone does not establish agreement; an application MAY use a secure authenticated broadcast mechanism. A participant unable to establish the required association or agreement MUST reject the result.
+All participants MUST establish a consistent view of ''(original_pk, thresh_pk, vss_commitment)''. The integrity of this public data and its association with the delivered share MUST be protected. Authenticated point-to-point delivery alone does not establish agreement; an application MAY use a secure authenticated broadcast mechanism. A participant unable to establish the required association or agreement MUST reject the result.
 
 === Participant Key Acceptance ===
 
-Each participant MUST perform the checks below and the distribution checks above before using its share. ''thresh_pk'' and ''pubshares'' MAY be omitted when derived exclusively from the commitment.
+Each participant MUST perform the checks below and the distribution checks above before using its share. Both ''original_pk'' and ''thresh_pk'' are required. Only ''pubshares'' MAY be omitted when derived exclusively from the commitment.
 
-Algorithm ''ParticipantKeyAccept(id, n, t, secshare, vss_commitment, thresh_pk, pubshares)'':
+Algorithm ''ParticipantKeyAccept(id, n, t, secshare, vss_commitment, original_pk, thresh_pk, pubshares)'':
 * Inputs:
 ** The participant identifier ''id'': an integer
 ** The participant count ''n'' and threshold ''t'': integers
 ** The final secret share ''secshare'': a 32-byte array encoding a nonzero scalar
 ** The final serialized commitment ''vss_commitment'': a byte array
-** The supplied threshold public key ''thresh_pk'': a 33-byte compressed public key (optional; ''None'' if omitted)
+** The original public key ''original_pk'': a 33-byte compressed public key encoding ''A0''
+** The tweaked threshold public key ''thresh_pk'': a 33-byte compressed public key encoding ''A1''
 ** The supplied public shares ''pubshares'': a list of ''n'' 33-byte compressed public keys in participant identifier order (optional; ''None'' if omitted)
 * Fail unless ''1 ≤ t ≤ n ≤ 128''.
 * Fail unless ''0 ≤ id < n''.
@@ -299,9 +305,12 @@ Algorithm ''ParticipantKeyAccept(id, n, t, secshare, vss_commitment, thresh_pk, 
 * Fail unless ''VerifySecshare(id, n, t, secshare, vss_commitment)'' returns ''True''.
 * Let ''derived_thresh_pk = ThreshPubkeyFromCommitment(t, vss_commitment)''; fail if that fails.
 * Let ''derived_pubshare = DerivePubshareFromCommitment(id, n, t, vss_commitment)''; fail if that fails.
-* If ''thresh_pk'' is supplied:
-** Parse ''cpoint(thresh_pk)''; fail if parsing fails.
-** Fail unless ''thresh_pk == derived_thresh_pk''.
+* Let ''A0 = cpoint(original_pk)'' and ''A1 = cpoint(thresh_pk)''; fail if either parse fails.
+* Let ''P = A0'' if ''has_even_y(A0)'', otherwise let ''P = -A0''.
+* Let ''tau = TaprootSafetyTweak(A0)''; fail if that fails.
+* Let ''Q = P + tau · G''; fail if ''Q == inf_point''.
+* Fail unless ''A1 == Q''.
+* Fail unless ''thresh_pk == derived_thresh_pk''.
 * If ''pubshares'' is supplied:
 ** Fail unless ''len(pubshares) == n''.
 ** For ''j = 0, ..., n - 1'':
@@ -309,13 +318,13 @@ Algorithm ''ParticipantKeyAccept(id, n, t, secshare, vss_commitment, thresh_pk, 
 *** Parse ''cpoint(pubshares[j])''; fail if parsing fails.
 *** Fail unless ''pubshares[j] == derived''.
 * Establish authenticated delivery, ceremony binding, and agreement on the final commitment through the application; fail unless the [[#Secret-Share Distribution|distribution requirements]] are satisfied.
-* Return the private record ''(id, secshare)'' and the public record ''(n, t, derived_thresh_pk, pubshares, vss_commitment)''.
+* Return the private record ''(id, secshare)'' and the public record ''(n, t, original_pk, derived_thresh_pk, pubshares, vss_commitment)''.
 
 If ''pubshares'' was omitted, the accepted public record may omit it; the complete list MAY subsequently be derived from the commitment using ''DerivePubshareFromCommitment'' for each identifier. Any supplied individual public share MUST likewise match its derived value. A failed check MUST NOT be repaired by changing a share, identifier, evaluation point, commitment, or supplied public key.
 
 === Completion and Failure Handling ===
 
-A ceremony completes only after dealer-side checks succeed, final shares are delivered, and every designated participant accepts its share under the same final commitment. If any participant rejects or fails to establish agreement, the ceremony MUST NOT be declared successful.
+A ceremony completes only after dealer-side checks succeed, final shares are delivered, and every designated participant accepts its share under the same ''(original_pk, thresh_pk, vss_commitment)''. If any participant rejects or fails to establish agreement, the ceremony MUST NOT be declared successful.
 
 An application MAY start a new attempt. It MUST NOT silently remove or replace a participant, change ''n'' or ''t'', combine material from different attempts, or use partial output to complete the original ceremony. Failed and superseded material MUST NOT be used for signing.
 
@@ -339,13 +348,9 @@ Applications MAY use the final key as a Taproot internal key and apply further t
 
 Feldman commitments provide verifiable sharing without an interactive distributed key-generation protocol. A proof of knowledge would not remove the dealer's knowledge of the secret; the trust limitations are described in [[#Dealer Trust and Randomness|Dealer Trust and Randomness]].
 
-=== Identifiers and Encodings ===
-
-The ''id + 1'' mapping combines zero-based protocol identifiers with the distinct, nonzero evaluation points required by Shamir sharing. Using zero itself would disclose the constant coefficient to participant zero. Compressed points preserve the parity information needed by BIP 445; extended encoding also represents the zero coefficients permitted by RFC 9591. Canonical parsing prevents different encodings from representing the same accepted value.
-
 === Preservation of Share Consistency ===
 
-Adding ''tau'' to the polynomial's constant coefficient adds ''tau'' to every secret share and ''tau G'' to the corresponding public points, preserving Feldman verification. The final polynomial still has degree at most ''t - 1'', so any ''t'' distinct participants' shares reconstruct its constant coefficient, and their public shares reconstruct the threshold public key. The underlying Shamir and Feldman constructions are described in [https://www.rfc-editor.org/rfc/rfc9591.html#appendix-C RFC 9591 Appendix C].
+Multiplying all coefficients and commitments by the parity factor ''g'', then adding ''tau'' to the constant coefficient and ''tau G'' to its commitment, preserves Feldman verification. The final polynomial still has degree at most ''t - 1'', so any ''t'' distinct participants' shares reconstruct its constant coefficient, and their public shares reconstruct the threshold public key. The underlying Shamir and Feldman constructions are described in [https://www.rfc-editor.org/rfc/rfc9591.html#appendix-C RFC 9591 Appendix C].
 
 == Security Considerations ==
 
@@ -371,7 +376,7 @@ Operations on secret scalars SHOULD use mature implementations designed to resis
 
 === Taproot and Signing Validation ===
 
-The key-generation tweak is intended to address hidden script paths. It does not make a malicious dealer safe: that dealer can already spend using the complete secret. Participants receive the final commitment, which alone does not prove how the dealer constructed the initial point or applied the tweak.
+The key-generation tweak is intended to address hidden script paths. It does not make a malicious dealer safe: that dealer can already spend using the complete secret. Participants verify the BIP 341 relationship between the supplied original and tweaked public keys and bind the latter to the final commitment. This establishes the key relationship, but does not prove honest randomness or dealer erasure.
 
 BIP 445 validation checks functional relationships needed for signing. It does not establish secure randomness, confidential delivery, agreement on commitments, or dealer erasure. Implementations MUST perform this specification's acceptance and distribution checks independently.
 
@@ -379,15 +384,13 @@ BIP 445 validation checks functional relationships needed for signing. It does n
 
 This proposal adds a key-generation procedure and changes no Bitcoin consensus rules, network protocol, wallet format, or BIP 445 signing algorithm. No consensus deployment mechanism is required.
 
-Other key-generation conventions MUST NOT be assumed interoperable. In particular, identifier mapping, point encoding, the key-generation transformation, and the supported BIP 445 parameter range must agree. For the effect of importing an existing secret, see [[#Randomness and Secret Import|Randomness and Secret Import]].
-
 == Test Vectors ==
 
 The [[bip-frost-trusted-dealer-test-vectors.json|deterministic test vectors]] provide successful and failing cases. Scalars and points use the encodings specified in [[#Notation|Notation]] and [[#Parsing a VSS Commitment|Parsing a VSS Commitment]], represented as hexadecimal byte strings. Test coefficients are for verification, not production generation.
 
-A successful vector SHOULD include ''n'', ''t'', initial coefficients and commitments, ''tau'', final coefficients and commitments, ''vss_commitment'', ''thresh_pk'', and each participant's identifier, share, and public share. It MUST permit checking the transformation, Feldman equation, and threshold-key derivation. Failure vectors SHOULD identify the failing operation and failure class; identical error messages are not required.
+A successful vector SHOULD include ''n'', ''t'', initial coefficients and commitments, ''tau'', final coefficients and commitments, ''original_pk'', ''vss_commitment'', ''thresh_pk'', and each participant's identifier, share, and public share. It MUST permit checking the transformation, Feldman equation, and threshold-key derivation. Failure vectors SHOULD identify the failing operation and failure class; identical error messages are not required.
 
-Coverage SHOULD include ''1-of-1'', a nontrivial threshold such as ''2-of-3'', ''t = n'', imported secrets, zero non-constant coefficients, and reconstruction from multiple signing subsets. Parameter-boundary tests SHOULD accept ''n = 128'' and reject ''n = 129'' in dealer generation, public-share derivation, share verification, and participant acceptance. Failure coverage SHOULD include invalid imported secrets and scalar encodings, malformed commitments, an infinity constant commitment, zero final shares, invalid identifiers, and tampered shares or commitments. Retry tests SHOULD confirm that zero final shares resample all non-constant coefficients while retaining the initial secret, and that Taproot-safety failures abort for both generated and imported secrets.
+Coverage SHOULD include both parities of ''A0'', agreement with BIP 341's no-script-path vectors, ''1-of-1'', a nontrivial threshold such as ''2-of-3'', ''t = n'', imported secrets, zero non-constant coefficients, and reconstruction from multiple signing subsets. Parameter-boundary tests SHOULD accept ''n = 128'' and reject ''n = 129'' in dealer generation, public-share derivation, share verification, and participant acceptance. Failure coverage SHOULD include invalid imported secrets and scalar encodings, malformed commitments, an infinity constant commitment, zero final shares, invalid identifiers, malformed or mismatched original and tweaked keys, incorrect parity normalization, and tampered shares or commitments. Retry tests SHOULD confirm that zero final shares resample all non-constant coefficients while retaining the initial secret, and that Taproot-safety failures abort for both generated and imported secrets.
 
 Implementations SHOULD cross-check the underlying Shamir and Feldman arithmetic against RFC 9591 where directly comparable, mapping RFC evaluation point ''x'' to ''id = x - 1''. Final outputs differ because this proposal additionally transforms the sharing.
 
@@ -397,7 +400,7 @@ The [[python/trusted_dealer_ref/trusted_dealer_ref.py|Python reference implement
 
 The specification is normative. The Python randomized wrapper implements the optional zero-final-share retry described in [[#Trusted Dealer Key Generation|Trusted Dealer Key Generation]].
 
-The Python ''participant_key_accept'' function performs the local cryptographic checks and returns the participant identifier, secret share, threshold public key, own public share, and VSS commitment. The application retains ''n'' and ''t'', derives or retains the complete public-share list as needed, and establishes authenticated distribution and commitment agreement before declaring acceptance as required by [[#Participant Key Acceptance|Participant Key Acceptance]].
+The Python ''participant_key_accept'' function performs the local cryptographic checks and returns the participant identifier, secret share, original public key, tweaked threshold public key, own public share, and VSS commitment. The application retains ''n'' and ''t'', derives or retains the complete public-share list as needed, and establishes authenticated distribution and agreement on the public setup data before declaring acceptance as required by [[#Participant Key Acceptance|Participant Key Acceptance]].
 
 The reference implementation is for demonstration and interoperability testing. It is not constant-time and does not provide reliable secret-memory erasure. Passing its tests does not establish production security.
 
