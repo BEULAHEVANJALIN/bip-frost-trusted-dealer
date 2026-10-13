@@ -52,6 +52,92 @@
       ]
     },
     {
+      "name": "equal_nonconstant_commitments",
+      "comment": "Equal coefficients legitimately occupy distinct commitment slots.",
+      "n": 4,
+      "t": 3,
+      "initial_coefficients": [
+        "0000000000000000000000000000000000000000000000000000000000000007",
+        "0000000000000000000000000000000000000000000000000000000000000005",
+        "0000000000000000000000000000000000000000000000000000000000000005"
+      ],
+      "initial_commitments": [
+        "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc",
+        "022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4"
+      ],
+      "taproot_safety_tweak": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3aef",
+      "final_coefficients": [
+        "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3af6",
+        "0000000000000000000000000000000000000000000000000000000000000005",
+        "0000000000000000000000000000000000000000000000000000000000000005"
+      ],
+      "final_commitments": [
+        "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3",
+        "022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4"
+      ],
+      "vss_commitment": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+      "original_pk": "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc",
+      "thresh_pk": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3",
+      "participants": [
+        {
+          "id": 0,
+          "evaluation_point": 1,
+          "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3b00",
+          "pubshare": "03c4586dcda1b1631374bf1bbd7a7eeb4c7c239bd40a4a7230daac0a5b21153177"
+        },
+        {
+          "id": 1,
+          "evaluation_point": 2,
+          "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3b14",
+          "pubshare": "03e9f06718f20609ce5fce72adffbd98de1e31523c78e51a86e8b9062576bcb8fc"
+        },
+        {
+          "id": 2,
+          "evaluation_point": 3,
+          "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3b32",
+          "pubshare": "03cfb4f362ac026e5e179ba14a8e90de0bbe569020ed0420df7788d5b378395f69"
+        },
+        {
+          "id": 3,
+          "evaluation_point": 4,
+          "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3b5a",
+          "pubshare": "02fadb556b068063afb1125be02b5c5f50cc65862f56770945ade3ae94193a47f3"
+        }
+      ]
+    },
+    {
+      "name": "bip341_no_script_path",
+      "comment": "BIP 341 wallet-test-vectors.json, keyPathSpending[0].inputSpending[0].",
+      "n": 1,
+      "t": 1,
+      "initial_coefficients": [
+        "6b973d88838f27366ed61c9ad6367663045cb456e28335c109e30717ae0c6baa"
+      ],
+      "initial_commitments": [
+        "02d6889cb081036e0faefa3a35157ad71086b123b2b144b649798b494c300a961d"
+      ],
+      "taproot_safety_tweak": "b86e7be8f39bab32a6f2c0443abbc210f0edac0e2c53d501b36b64437d9c6c70",
+      "final_coefficients": [
+        "2405b971772ad26915c8dcdf10f238753a9b837e5f8e6a86fd7c0cce5b7296d9"
+      ],
+      "final_commitments": [
+        "0353a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343"
+      ],
+      "vss_commitment": "0353a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343",
+      "original_pk": "02d6889cb081036e0faefa3a35157ad71086b123b2b144b649798b494c300a961d",
+      "thresh_pk": "0353a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343",
+      "participants": [
+        {
+          "id": 0,
+          "evaluation_point": 1,
+          "secshare": "2405b971772ad26915c8dcdf10f238753a9b837e5f8e6a86fd7c0cce5b7296d9",
+          "pubshare": "0353a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343"
+        }
+      ]
+    },
+    {
       "name": "1_of_1",
       "comment": "Basic deterministic 1-of-1 vector.",
       "n": 1,
@@ -267,6 +353,7 @@
   "invalid": [
     {
       "name": "participant_count_above_limit",
+      "operation": "TrustedDealerKeygenInternal",
       "comment": "Participant count exceeds the BIP 445 limit of 128.",
       "n": 129,
       "t": 1,
@@ -277,6 +364,7 @@
     },
     {
       "name": "zero_imported_secret",
+      "operation": "TrustedDealerKeygen",
       "comment": "Imported threshold secret is zero.",
       "n": 3,
       "t": 2,
@@ -285,6 +373,7 @@
     },
     {
       "name": "seckey_equal_to_group_order",
+      "operation": "TrustedDealerKeygen",
       "comment": "Imported threshold secret is equal to the secp256k1 group order.",
       "n": 3,
       "t": 2,
@@ -293,6 +382,7 @@
     },
     {
       "name": "malformed_vss_length",
+      "operation": "ParseVSSCommitment",
       "comment": "VSS commitment length is not exactly 33*t bytes.",
       "n": 3,
       "t": 2,
@@ -301,6 +391,7 @@
     },
     {
       "name": "infinity_constant_commitment",
+      "operation": "ParseVSSCommitment",
       "comment": "The constant-term VSS commitment is infinity.",
       "n": 3,
       "t": 2,
@@ -309,6 +400,7 @@
     },
     {
       "name": "zero_final_share",
+      "operation": "TrustedDealerKeygenInternal",
       "comment": "Final secret share for participant 0 is zero after the Taproot-safety transformation.",
       "n": 2,
       "t": 2,
@@ -317,6 +409,559 @@
         "00027f6ec34e8ed05bf5e832d32a5a6c47c55b21f5552705d92d76f97c0dfac3"
       ],
       "expected_failure": "zero_final_share"
+    },
+    {
+      "name": "accept_original_pk_empty",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed original_pk: empty.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_original_pk_short",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed original_pk: short.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "0000000000000000000000000000000000000000000000000000000000000000",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_original_pk_long",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed original_pk: long.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "00000000000000000000000000000000000000000000000000000000000000000000",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_original_pk_infinity",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed original_pk: infinity.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "000000000000000000000000000000000000000000000000000000000000000000",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_original_pk_invalid_prefix",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed original_pk: invalid_prefix.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "04fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_original_pk_x_out_of_range",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed original_pk: x_out_of_range.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_missing_original_pk",
+      "operation": "ParticipantKeyAccept",
+      "comment": "The required original_pk is absent.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "missing_required_public_key"
+    },
+    {
+      "name": "accept_thresh_pk_empty",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed thresh_pk: empty.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_thresh_pk_short",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed thresh_pk: short.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "0000000000000000000000000000000000000000000000000000000000000000",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_thresh_pk_long",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed thresh_pk: long.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "00000000000000000000000000000000000000000000000000000000000000000000",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_thresh_pk_infinity",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed thresh_pk: infinity.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "000000000000000000000000000000000000000000000000000000000000000000",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_thresh_pk_invalid_prefix",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed thresh_pk: invalid_prefix.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "04fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_thresh_pk_x_out_of_range",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed thresh_pk: x_out_of_range.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_public_key_encoding"
+    },
+    {
+      "name": "accept_missing_thresh_pk",
+      "operation": "ParticipantKeyAccept",
+      "comment": "The required thresh_pk is absent.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "missing_required_public_key"
+    },
+    {
+      "name": "accept_unrelated_original_key",
+      "operation": "ParticipantKeyAccept",
+      "comment": "A0 does not produce the supplied A1.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_taproot_relationship"
+    },
+    {
+      "name": "accept_unrelated_tweaked_key",
+      "operation": "ParticipantKeyAccept",
+      "comment": "A1 is unrelated to the supplied A0.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_taproot_relationship"
+    },
+    {
+      "name": "accept_opposite_tweaked_key_parity",
+      "operation": "ParticipantKeyAccept",
+      "comment": "A1 has the right X but wrong Y parity.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "02a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_taproot_relationship"
+    },
+    {
+      "name": "accept_keys_from_another_commitment",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Valid A0/A1 pair belongs to another commitment.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc",
+        "thresh_pk": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "threshold_key_mismatch"
+    },
+    {
+      "name": "accept_unnormalized_odd_y_key",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Odd-Y A0 was tweaked without even-Y normalization.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba584e",
+        "vss_commitment": "02411ef3f61fa8e2fb6cce3716df8d3fa5ea8dd998ac5a4127caeab61cfb0778ae022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "02411ef3f61fa8e2fb6cce3716df8d3fa5ea8dd998ac5a4127caeab61cfb0778ae",
+        "pubshares": null
+      },
+      "expected_failure": "invalid_taproot_relationship"
+    },
+    {
+      "name": "accept_pubshare_short",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed public share at identifier 1: short.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_pubshare_encoding"
+    },
+    {
+      "name": "accept_pubshare_padded",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed public share at identifier 1: padded.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "0200e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_pubshare_encoding"
+    },
+    {
+      "name": "accept_pubshare_infinity",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed public share at identifier 1: infinity.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "000000000000000000000000000000000000000000000000000000000000000000",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_pubshare_encoding"
+    },
+    {
+      "name": "accept_pubshare_invalid_prefix",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed public share at identifier 1: invalid_prefix.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "04e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_pubshare_encoding"
+    },
+    {
+      "name": "accept_pubshare_x_out_of_range",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Malformed public share at identifier 1: x_out_of_range.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_pubshare_encoding"
+    },
+    {
+      "name": "accept_pubshare_wrong_identifier",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Public share for identifier 2 occupies slot 1.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "pubshare_mismatch"
+    },
+    {
+      "name": "accept_incomplete_pubshare_list",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Supplied list has fewer than n entries.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e"
+        ]
+      },
+      "expected_failure": "invalid_pubshare_count"
+    },
+    {
+      "name": "accept_invalid_identifier",
+      "operation": "ParticipantKeyAccept",
+      "comment": "Identifier n is outside the participant range.",
+      "inputs": {
+        "id": 3,
+        "n": 3,
+        "t": 2,
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_identifier"
+    },
+    {
+      "name": "accept_tampered_secret_share",
+      "operation": "ParticipantKeyAccept",
+      "comment": "A canonical scalar fails the Feldman equation.",
+      "inputs": {
+        "id": 0,
+        "n": 3,
+        "t": 2,
+        "secshare": "0000000000000000000000000000000000000000000000000000000000000001",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "pubshares": [
+          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
+          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+        ]
+      },
+      "expected_failure": "invalid_secret_share"
     }
   ]
 }

@@ -136,7 +136,7 @@ The final commitment is serialized in coefficient order as:
 
 :''vss_commitment = cbytes_ext(B<sub>0</sub>) || ... || cbytes_ext(B<sub>t-1</sub>)''.
 
-It MUST contain exactly ''33t'' bytes. ''B<sub>0</sub>'' MUST NOT be infinity; non-constant commitments MAY be infinity, encoded as 33 zero bytes by ''cbytes_ext''. Commitment elements MUST NOT be reordered, omitted, or duplicated. The extended encoding does not permit infinity in an ordinary public key.
+It MUST contain exactly ''33t'' bytes, with each coefficient's commitment occupying its corresponding slot exactly once. ''B<sub>0</sub>'' MUST NOT be infinity; non-constant commitments MAY be infinity, encoded as 33 zero bytes by ''cbytes_ext''. Different slots MAY contain equal commitment values. The extended encoding does not permit infinity in an ordinary public key.
 
 Algorithm ''ParseVSSCommitment(vss_commitment, t)'':
 * Inputs:
@@ -284,7 +284,7 @@ After dealer-side validation, the dealer MUST deliver ''secshares[id]'' only to 
 
 The application defines the transport and serialization of this context. It MAY additionally bind a ceremony identifier, transcript identifier, device identity, or network identity. A share from another ceremony MUST NOT be accepted merely because it uses the same participant identifier.
 
-All participants MUST establish a consistent view of ''(original_pk, thresh_pk, vss_commitment)''. The integrity of this public data and its association with the delivered share MUST be protected. Authenticated point-to-point delivery alone does not establish agreement; an application MAY use a secure authenticated broadcast mechanism. A participant unable to establish the required association or agreement MUST reject the result.
+All participants MUST establish a consistent view of ''(n, t, original_pk, thresh_pk, vss_commitment)'' and the mapping from participant identifiers to intended participant identities. This mapping MAY be agreed before the ceremony. The integrity of this public data and its association with the delivered share MUST be protected. Authenticated point-to-point delivery alone does not establish agreement; an application MAY use a secure authenticated broadcast mechanism. A participant unable to establish the required association or agreement MUST reject the result.
 
 === Participant Key Acceptance ===
 
@@ -315,6 +315,7 @@ Algorithm ''ParticipantKeyAccept(id, n, t, secshare, vss_commitment, original_pk
 ** Fail unless ''len(pubshares) == n''.
 ** For ''j = 0, ..., n - 1'':
 *** Let ''derived = DerivePubshareFromCommitment(j, n, t, vss_commitment)''; fail if that fails.
+*** Fail unless ''len(pubshares[j]) == 33''.
 *** Parse ''cpoint(pubshares[j])''; fail if parsing fails.
 *** Fail unless ''pubshares[j] == derived''.
 * Establish authenticated delivery, ceremony binding, and agreement on the final commitment through the application; fail unless the [[#Secret-Share Distribution|distribution requirements]] are satisfied.
@@ -324,11 +325,11 @@ If ''pubshares'' was omitted, the accepted public record may omit it; the comple
 
 === Completion and Failure Handling ===
 
-A ceremony completes only after dealer-side checks succeed, final shares are delivered, and every designated participant accepts its share under the same ''(original_pk, thresh_pk, vss_commitment)''. If any participant rejects or fails to establish agreement, the ceremony MUST NOT be declared successful.
+A ceremony completes only after dealer-side checks succeed, final shares are delivered, and every designated participant accepts its share with the common setup data and participant mapping required by [[#Secret-Share Distribution|Secret-Share Distribution]]. If any participant rejects or fails to establish agreement, the ceremony MUST NOT be declared successful.
 
 An application MAY start a new attempt. It MUST NOT silently remove or replace a participant, change ''n'' or ''t'', combine material from different attempts, or use partial output to complete the original ceremony. Failed and superseded material MUST NOT be used for signing.
 
-After successful completion the dealer MUST delete secret state that is no longer required: initial and final secrets, coefficients, copies of participant shares, secret sampling material, and temporary or serialized copies. Secret state MUST remain confidential while it exists and MUST NOT be logged, persisted, exposed through diagnostics, or sent to others except as required for share delivery. Subsequent signing MUST NOT depend on retained dealer secrets.
+After completion or abort, the dealer MUST delete secret state that is no longer required: initial and final secrets, coefficients, copies of participant shares, secret sampling material, and temporary or serialized copies. Participants MUST delete shares from aborted or superseded attempts. Before a permitted zero-final-share retry, the dealer MUST discard the failed attempt's non-constant coefficients and derived secret material; it MAY retain ''a0'' only as specified in [[#Trusted Dealer Key Generation|Trusted Dealer Key Generation]]. Secret state MUST remain confidential while it exists and MUST NOT be logged, persisted, exposed through diagnostics, or sent to others except as required for share delivery. Subsequent signing MUST NOT depend on retained dealer secrets.
 
 Logical deletion means the implementation no longer intentionally retains or uses these values. Implementations SHOULD minimize secret lifetimes and copies and use secure-memory and zeroization facilities where available. Public state MAY be retained with its integrity and ceremony association protected.
 
@@ -336,11 +337,13 @@ Logical deletion means the implementation no longer intentionally retains or use
 
 A signing session selects ''u'' distinct participants, with ''1 ≤ t ≤ u ≤ n ≤ 128'', and uses their original identifiers, accepted secret shares, corresponding public shares, and common threshold public key. Long-term material MUST NOT be altered except by this specification's transformation or applicable BIP 445 algorithms. See [[#Taproot and Signing Validation|Taproot and Signing Validation]] for the limits of signing-context validation.
 
-[https://github.com/siv2r/bip-frost-signing BIP 445] represents public key material as ''Threshold Info'' and uses a ''Session Context'' for signing.
+[https://github.com/siv2r/bip-frost-signing#threshold-info BIP 445] represents public key material as ''Threshold Info'' and uses a ''Session Context'' for signing. Construct ''Threshold Info'' from the accepted threshold ''t'', final ''thresh_pk'', and the ''n'' public shares in participant identifier order. If ''pubshares'' was omitted during acceptance, derive the list using ''DerivePubshareFromCommitment'' for each identifier. Entry ''id + 1'' in BIP 445's one-indexed list corresponds to ''pubshares[id]'' here. Before signing, this ''Threshold Info'' MUST pass BIP 445's ''ValidateThresholdInfo''. Signers MUST obtain their long-term public material from this accepted record.
 
 The output ''thresh_pk'' is a 33-byte plain public key. The word ''plain'' describes its representation, not whether it has been transformed. It is not a serialized Taproot witness program.
 
-Applications MAY use the final key as a Taproot internal key and apply further tweaks through BIP 445 and [https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki BIP 341]. These signing-time tweaks do not modify the long-term shares. X-only interpretation and parity handling follow BIP 340, BIP 341, and BIP 445. A script-tree tweak MUST include the applicable Merkle root; an output without a spendable script path follows BIP 341's no-script-path construction.
+The key-generation tweak is already incorporated in the accepted shares and ''thresh_pk''. Using ''xbytes(A1)'' directly as a no-script-path Taproot output key requires no further signing-time tweak. Implementations MUST NOT reapply the key-generation ''tau'' merely to reproduce ''A1''.
+
+Applications MAY instead use ''A1'' as a new Taproot internal key and apply a further BIP 341 tweak through BIP 445. This produces a different output key. Derive that additional tweak from ''xbytes(A1)'' and, when present, the script tree's Merkle root; without a script tree, omit the root as specified by BIP 341. These signing-time tweaks do not modify the long-term shares. X-only interpretation and parity handling follow BIP 340, BIP 341, and BIP 445.
 
 == Rationale ==
 
@@ -372,7 +375,7 @@ A dealer can send individually valid shares under different commitments. The com
 
 Dealer erasure reduces the exposure period but cannot undo earlier disclosure. High-level runtimes, swap, crash dumps, storage, compilers, and hardware may retain residual copies; this does not remove the logical deletion requirement.
 
-Operations on secret scalars SHOULD use mature implementations designed to resist timing and other relevant side channels, and SHOULD avoid secret-dependent control flow or memory access where practical. Pseudocode describes functional behavior and MUST NOT be treated as demonstrating constant-time execution, fault resistance, or secure memory handling.
+Operations on secret scalars SHOULD use mature implementations designed to resist timing and other relevant side channels, and SHOULD avoid secret-dependent control flow or memory access where practical. The algorithms describe functional behavior and MUST NOT be treated as demonstrating constant-time execution, fault resistance, or secure memory handling.
 
 === Taproot and Signing Validation ===
 
@@ -390,17 +393,19 @@ The [[bip-frost-trusted-dealer-test-vectors.json|deterministic test vectors]] pr
 
 A successful vector SHOULD include ''n'', ''t'', initial coefficients and commitments, ''tau'', final coefficients and commitments, ''original_pk'', ''vss_commitment'', ''thresh_pk'', and each participant's identifier, share, and public share. It MUST permit checking the transformation, Feldman equation, and threshold-key derivation. Failure vectors SHOULD identify the failing operation and failure class; identical error messages are not required.
 
+The JSON file groups cases under ''valid'' and ''invalid''. Each failure case names its algorithm in ''operation'' and its failure class in ''expected_failure''. Participant-acceptance failure cases provide an ''inputs'' object with the algorithm's input names; ''pubshares'' may be ''null'', and a missing required key is intentionally absent. Other failure cases provide their inputs at the top level. These cases include malformed public shares, mismatched original and tweaked keys, and omitted even-Y normalization.
+
 Coverage SHOULD include both parities of ''A0'', agreement with BIP 341's no-script-path vectors, ''1-of-1'', a nontrivial threshold such as ''2-of-3'', ''t = n'', imported secrets, zero non-constant coefficients, and reconstruction from multiple signing subsets. Parameter-boundary tests SHOULD accept ''n = 128'' and reject ''n = 129'' in dealer generation, public-share derivation, share verification, and participant acceptance. Failure coverage SHOULD include invalid imported secrets and scalar encodings, malformed commitments, an infinity constant commitment, zero final shares, invalid identifiers, malformed or mismatched original and tweaked keys, incorrect parity normalization, and tampered shares or commitments. Retry tests SHOULD confirm that zero final shares resample all non-constant coefficients while retaining the initial secret, and that Taproot-safety failures abort for both generated and imported secrets.
 
 Implementations SHOULD cross-check the underlying Shamir and Feldman arithmetic against RFC 9591 where directly comparable, mapping RFC evaluation point ''x'' to ''id = x - 1''. Final outputs differ because this proposal additionally transforms the sharing.
 
 == Reference Implementation ==
 
-The [[python/trusted_dealer_ref/trusted_dealer_ref.py|Python reference implementation]] implements the deterministic construction and participant checks. Its [[python/trusted_dealer_ref/test_trusted_dealer_ref.py|algorithm tests]] and [[python/trusted_dealer_ref/test_test_vectors.py|vector tests]] exercise generation, verification, and reconstruction. The Python generation entry point takes ''(t, n, seckey)'', while the specification algorithm names its inputs ''(n, t, seckey)''.
+The [[python/trusted_dealer_ref/trusted_dealer_ref.py|Python reference implementation]] implements the deterministic construction and participant checks. Its [[python/trusted_dealer_ref/test_trusted_dealer_ref.py|algorithm tests]], [[python/trusted_dealer_ref/test_taproot_acceptance.py|BIP 341 acceptance tests]], and [[python/trusted_dealer_ref/test_test_vectors.py|vector tests]] exercise generation, verification, and reconstruction. The [[python/trusted_dealer_ref/test_bip445_integration.py|BIP 445 integration tests]] validate Threshold Info, perform signing with the BIP 445 reference implementation, and verify the resulting BIP 340 signatures, both with and without additional Taproot tweaks. See [[README.md|the README]] for setup, test, and vector-generation commands. The Python generation entry point takes ''(t, n, seckey)'', while the specification algorithm names its inputs ''(n, t, seckey)''.
 
 The specification is normative. The Python randomized wrapper implements the optional zero-final-share retry described in [[#Trusted Dealer Key Generation|Trusted Dealer Key Generation]].
 
-The Python ''participant_key_accept'' function performs the local cryptographic checks and returns the participant identifier, secret share, original public key, tweaked threshold public key, own public share, and VSS commitment. The application retains ''n'' and ''t'', derives or retains the complete public-share list as needed, and establishes authenticated distribution and agreement on the public setup data before declaring acceptance as required by [[#Participant Key Acceptance|Participant Key Acceptance]].
+The Python ''participant_key_accept'' function performs the local cryptographic checks and returns the participant identifier, secret share, original public key, tweaked threshold public key, own public share, and VSS commitment. The application retains ''n'' and ''t'', derives or retains the complete public-share list, and validates Threshold Info before signing as required by [[#Use with BIP 445|Use with BIP 445]]. It also establishes authenticated distribution and agreement on the public setup data and participant mapping before declaring acceptance. Ceremony completion, abort handling, and deletion of caller-held secret material are application responsibilities.
 
 The reference implementation is for demonstration and interoperability testing. It is not constant-time and does not provide reliable secret-memory erasure. Passing its tests does not establish production security.
 

@@ -501,6 +501,10 @@ def trusted_dealer_keygen(
     Only a zero final participant share permits retrying with fresh
     nonconstant coefficients and the same initial secret. A Taproot
     safety failure aborts the operation, including for generated secrets.
+
+    The caller owns delivery and ceremony completion, including deleting
+    returned dealer-held shares after completion or abort. This reference
+    does not provide secure erasure of Python objects or exception frames.
     """
     validate_params(t, n)
 
@@ -554,6 +558,11 @@ def trusted_dealer_keygen(
                 )
 
             continue
+
+        finally:
+            # Drop this attempt's coefficient list on success, abort, or
+            # retry. This is logical cleanup, not secure memory erasure.
+            coeffs.clear()
 
 
 #
@@ -746,8 +755,11 @@ def participant_key_accept(
 
     Transport authentication, confidentiality, ceremony binding, and
     the requirement that all participants have the same view of the
-    original key, tweaked key, and VSS commitment are application
-    responsibilities and cannot be established by this local function alone.
+    parameters, participant-to-identity mapping, original key, tweaked key,
+    and VSS commitment are application responsibilities. The application
+    must also construct and validate BIP 445 ThresholdInfo before signing;
+    omitted public shares can be derived from the accepted commitment.
+    These steps cannot be established by this local function alone.
     """
     validate_params(t, n)
 
@@ -825,12 +837,13 @@ def participant_key_accept(
             )
 
         for j, supplied in enumerate(pubshares):
-            try:
-                supplied_point = (
-                    GE.from_bytes_compressed(
-                        supplied
-                    )
+            if len(supplied) != 33:
+                raise ValueError(
+                    f"The supplied public share at index {j} "
+                    "must have length 33."
                 )
+            try:
+                GE.from_bytes_compressed(supplied)
             except ValueError as e:
                 raise ValueError(
                     f"The supplied public share at index {j} "
@@ -846,10 +859,7 @@ def participant_key_accept(
                 )
             )
 
-            if (
-                supplied_point.to_bytes_compressed()
-                != derived
-            ):
+            if supplied != derived:
                 raise ValueError(
                     f"The supplied public share at index {j} "
                     "does not match the VSS commitment."

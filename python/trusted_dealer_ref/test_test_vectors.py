@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
+import sys
 from itertools import combinations
 from pathlib import Path
 
@@ -772,6 +775,13 @@ def test_zero_initial_share_vector():
 def test_invalid_vectors(vector):
     expected_failure = vector["expected_failure"]
 
+    if vector["operation"] == "ParticipantKeyAccept":
+        inputs = decode_acceptance_inputs(vector["inputs"])
+        error = TypeError if expected_failure == "missing_required_public_key" else ValueError
+        with pytest.raises(error):
+            td.participant_key_accept(**inputs)
+        return
+
     if expected_failure == "invalid_parameters":
         coeffs = [
             scalar_from_hex(value)
@@ -877,3 +887,55 @@ def test_vector_public_key_delivery_and_acceptance(vector):
         )
         assert accepted.original_pk == original_pk
         assert accepted.pubshare.hex() == participant["pubshare"]
+
+
+def decode_acceptance_inputs(inputs):
+    result = dict(inputs)
+    result["participant_id"] = result.pop("id")
+    for key in ("secshare", "vss_commitment", "original_pk", "thresh_pk"):
+        if key in result:
+            result[key] = bytes.fromhex(result[key])
+    if result.get("pubshares") is not None:
+        result["pubshares"] = [bytes.fromhex(p) for p in result["pubshares"]]
+    return result
+
+
+def test_acceptance_failures_with_python_optimizations():
+    # A subprocess ensures library assertions really are disabled. In
+    # particular, a 34-byte, zero-padded public share must not be normalized
+    # to a valid point by the low-level parser and silently accepted.
+    script = '''
+import json
+import sys
+from trusted_dealer_ref import participant_key_accept
+
+with open(sys.argv[1], encoding="utf-8") as stream:
+    vectors = json.load(stream)
+for vector in vectors["invalid"]:
+    if vector["operation"] != "ParticipantKeyAccept":
+        continue
+    args = dict(vector["inputs"])
+    args["participant_id"] = args.pop("id")
+    for key in ("secshare", "vss_commitment", "original_pk", "thresh_pk"):
+        if key in args:
+            args[key] = bytes.fromhex(args[key])
+    if args.get("pubshares") is not None:
+        args["pubshares"] = [bytes.fromhex(p) for p in args["pubshares"]]
+    error = TypeError if vector["expected_failure"] == "missing_required_public_key" else ValueError
+    try:
+        participant_key_accept(**args)
+    except error:
+        continue
+    raise RuntimeError("Accepted invalid vector: " + vector["name"])
+'''
+    env = dict(os.environ, PYTHONPATH=str(REPO_ROOT / "python"))
+    subprocess.run(
+        [sys.executable, "-O", "-c", script, str(TEST_VECTOR_PATH)],
+        env=env, check=True, capture_output=True, text=True,
+    )
+
+
+def test_vector_file_matches_generator():
+    from trusted_dealer_ref.gen_test_vectors import build_vectors
+
+    assert load_vectors() == build_vectors()
