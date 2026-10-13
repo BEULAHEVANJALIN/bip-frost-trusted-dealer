@@ -3,7 +3,7 @@
   "valid": [
     {
       "name": "odd_y_initial_key",
-      "comment": "Odd-Y initial key requires negating all coefficients before tweaking.",
+      "comment": "Odd-Y initial key requires negating only the constant coefficient before tweaking.",
       "n": 3,
       "t": 3,
       "initial_coefficients": [
@@ -19,35 +19,35 @@
       "taproot_safety_tweak": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5843",
       "final_coefficients": [
         "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba583d",
-        "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd036413c",
+        "0000000000000000000000000000000000000000000000000000000000000005",
         "0000000000000000000000000000000000000000000000000000000000000000"
       ],
       "final_commitments": [
         "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
-        "032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "000000000000000000000000000000000000000000000000000000000000000000"
       ],
-      "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4000000000000000000000000000000000000000000000000000000000000000000",
+      "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4000000000000000000000000000000000000000000000000000000000000000000",
       "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
       "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
       "participants": [
         {
           "id": 0,
           "evaluation_point": 1,
-          "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-          "pubshare": "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd"
+          "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+          "pubshare": "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50"
         },
         {
           "id": 1,
           "evaluation_point": 2,
-          "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5833",
-          "pubshare": "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e"
+          "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5847",
+          "pubshare": "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac"
         },
         {
           "id": 2,
           "evaluation_point": 3,
-          "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba582e",
-          "pubshare": "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba584c",
+          "pubshare": "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         }
       ]
     },
@@ -406,7 +406,7 @@
       "t": 2,
       "initial_coefficients": [
         "0000000000000000000000000000000000000000000000000000000000000011",
-        "00027f6ec34e8ed05bf5e832d32a5a6c47c55b21f5552705d92d76f97c0dfac3"
+        "fffd80913cb1712fa40a17cd2cd5a59272e981c4b9f37935e6a4e7935428467e"
       ],
       "expected_failure": "zero_final_share"
     },
@@ -418,14 +418,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -438,14 +438,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "0000000000000000000000000000000000000000000000000000000000000000",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -458,14 +458,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "00000000000000000000000000000000000000000000000000000000000000000000",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -478,14 +478,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "000000000000000000000000000000000000000000000000000000000000000000",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -498,14 +498,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "04fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -518,14 +518,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -538,13 +538,13 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "missing_required_public_key"
@@ -557,14 +557,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -577,14 +577,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "0000000000000000000000000000000000000000000000000000000000000000",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -597,14 +597,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "00000000000000000000000000000000000000000000000000000000000000000000",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -617,14 +617,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "000000000000000000000000000000000000000000000000000000000000000000",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -637,14 +637,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "04fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -657,14 +657,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_public_key_encoding"
@@ -677,13 +677,13 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "missing_required_public_key"
@@ -696,14 +696,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_taproot_relationship"
@@ -716,14 +716,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_taproot_relationship"
@@ -736,14 +736,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "02a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_taproot_relationship"
@@ -756,14 +756,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc",
         "thresh_pk": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "threshold_key_mismatch"
@@ -792,14 +792,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_pubshare_encoding"
@@ -812,14 +812,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "0200e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "0200ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_pubshare_encoding"
@@ -832,14 +832,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
           "000000000000000000000000000000000000000000000000000000000000000000",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_pubshare_encoding"
@@ -852,14 +852,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "04e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "04ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_pubshare_encoding"
@@ -872,14 +872,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
           "02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_pubshare_encoding"
@@ -892,14 +892,14 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "pubshare_mismatch"
@@ -912,13 +912,13 @@
         "id": 0,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac"
         ]
       },
       "expected_failure": "invalid_pubshare_count"
@@ -931,14 +931,14 @@
         "id": 3,
         "n": 3,
         "t": 2,
-        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5838",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_identifier"
@@ -952,13 +952,13 @@
         "n": 3,
         "t": 2,
         "secshare": "0000000000000000000000000000000000000000000000000000000000000001",
-        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a032f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
         "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
         "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
         "pubshares": [
-          "02b57c74418f39e85b2e535bd7e125deb116c503d4eb7b2bede860a702ea1cfbbd",
-          "02e1a0b9d34c5c0c0e0a8af8e4b45442fd5e77986a59086b5c8de15d3ec08e5d1e",
-          "023c5fe1f1d2bbd518125473965e7712b64f05fba457ea7819a081745d2439bf54"
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
         ]
       },
       "expected_failure": "invalid_secret_share"

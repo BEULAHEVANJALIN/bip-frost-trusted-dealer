@@ -302,11 +302,11 @@ def test_final_coefficients(vector):
     # Bitcoin-specific Taproot-safety transformation:
     #
     #     b_0 = sign*a_0 + tweak
-    #     b_j = sign*a_j     for j > 0
+    #     b_j = a_j     for j > 0
     #
     sign = Scalar(1) if (initial[0] * G).has_even_y() else -Scalar(1)
     assert final[0] == sign * initial[0] + tweak
-    assert final[1:] == [sign * a for a in initial[1:]]
+    assert final[1:] == initial[1:]
 
     # The final threshold secret must be nonzero.
     assert final[0] != Scalar(0)
@@ -344,9 +344,9 @@ def test_final_commitments(vector):
     assert final[0] == sign * initial[0] + tweak * G
 
     #
-    #     B_j = sign*A_j for j > 0
+    #     B_j = A_j for j > 0
     #
-    assert final[1:] == [sign * A for A in initial[1:]]
+    assert final[1:] == initial[1:]
 
     #
     # Every final commitment must also satisfy:
@@ -864,11 +864,11 @@ def test_zero_final_share_vector_is_constructed_correctly():
     # Participant 0 evaluates at x = 1:
     #
     #   f_final(1)
-    #       = sign*(a_0 + a_1) + tweak
+    #       = sign*a_0 + tweak + a_1
     #       = 0
     #
     sign = Scalar(1) if (a_0 * G).has_even_y() else -Scalar(1)
-    assert sign * (a_0 + a_1) + tweak == Scalar(0)
+    assert sign * a_0 + tweak + a_1 == Scalar(0)
 
 
 @pytest.mark.parametrize("vector", load_vectors()["valid"], ids=lambda v: v["name"])

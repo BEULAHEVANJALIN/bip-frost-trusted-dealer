@@ -294,8 +294,9 @@ def apply_taproot_safety(
     Apply BIP 341's no-script-path tweak to the sharing.
 
     Set g = 1 for an even-Y initial constant commitment, otherwise -1.
-    Then f_final(x) = g*f(x) + tweak, with b_0 = g*a_0 + tweak and
-    b_j = g*a_j for j > 0. Apply the same sign to all commitments.
+    Set b_0 = g*a_0 + tweak and B_0 = g*C_0 + tweak*G. All nonconstant
+    coefficients and commitments remain unchanged, so
+    f_final(x) = f(x) + (g - 1)*a_0 + tweak.
     """
     if len(coeffs) == 0:
         raise ValueError(
@@ -330,8 +331,8 @@ def apply_taproot_safety(
     tweak = taproot_safety_tweak(commitments[0])
 
     sign = Scalar(1) if commitments[0].has_even_y() else -Scalar(1)
-    final_coeffs = [sign * coeff for coeff in coeffs]
-    final_coeffs[0] = final_coeffs[0] + tweak
+    final_coeffs = list(coeffs)
+    final_coeffs[0] = sign * coeffs[0] + tweak
 
     if final_coeffs[0] == Scalar(0):
         raise TaprootSafetyError(
@@ -339,10 +340,9 @@ def apply_taproot_safety(
             "a zero threshold secret."
         )
 
-    final_commitments = [sign * commitment for commitment in commitments]
-    final_commitments[0] = (
-        final_commitments[0] + tweak * G
-    )
+    normalized_point = sign * commitments[0]
+    final_commitments = list(commitments)
+    final_commitments[0] = normalized_point + tweak * G
 
     if final_commitments[0].infinity:
         raise TaprootSafetyError(

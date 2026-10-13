@@ -174,7 +174,7 @@ def test_zero_final_share_retries_all_nonconstant_coefficients(imported, monkeyp
     final_constant = sign * a0 + td.taproot_safety_tweak(a0 * G)
     # The first polynomial has final f(1) = 0; the second succeeds.
     bad_a2 = s(5)
-    bad_a1 = -sign * final_constant - bad_a2
+    bad_a1 = -final_constant - bad_a2
     expected = td.trusted_dealer_keygen_internal([a0, s(1), s(2)], 3)
     initial_sampler = Mock(side_effect=[a0])
     coefficient_sampler = Mock(side_effect=[bad_a1, bad_a2, s(1), s(2)])
@@ -385,9 +385,9 @@ def test_taproot_safety_transformation(a0):
     )
 
     #
-    # b_j = sign*a_j for j > 0
+    # b_j = a_j for j > 0
     #
-    assert final_coeffs[1:] == [sign * a for a in initial_coeffs[1:]]
+    assert final_coeffs[1:] == initial_coeffs[1:]
 
     #
     # B_0 = sign*A_0 + tweak*G
@@ -398,11 +398,11 @@ def test_taproot_safety_transformation(a0):
     )
 
     #
-    # B_j = sign*A_j for j > 0
+    # B_j = A_j for j > 0
     #
     assert (
         final_commitments[1:]
-        == [sign * A for A in initial_commitments[1:]]
+        == initial_commitments[1:]
     )
 
     #
@@ -416,7 +416,7 @@ def test_taproot_safety_transformation(a0):
 
 
 @pytest.mark.parametrize("a0", [5, 6])
-def test_final_share_is_signed_initial_share_plus_tweak(a0):
+def test_final_share_changes_only_by_constant_term_offset(a0):
     initial_coeffs = [
         s(a0),
         s(9),
@@ -449,7 +449,7 @@ def test_final_share_is_signed_initial_share_plus_tweak(a0):
 
         assert (
             final_share
-            == sign * initial_share + transformed.tweak
+            == initial_share + (sign - s(1)) * initial_coeffs[0] + transformed.tweak
         )
 
 
@@ -538,7 +538,7 @@ def test_zero_final_share_is_rejected():
     Deliberately choose a_1 so participant 0 obtains:
 
         f_final(1)
-          = sign*(a_0 + a_1) + tweak
+          = sign*a_0 + tweak + a_1
           = 0.
 
     This tests that rejection happens after the
@@ -559,10 +559,10 @@ def test_zero_final_share_is_rejected():
     #
     # Choose:
     #
-    #     a_1 = -sign*final_constant
+    #     a_1 = -final_constant
     #
     # so final f(1) = 0.
-    a_1 = -sign * final_constant
+    a_1 = -final_constant
 
     with pytest.raises(td.ZeroFinalShareError):
         td.trusted_dealer_keygen_internal(

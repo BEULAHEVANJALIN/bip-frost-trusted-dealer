@@ -93,7 +93,7 @@ def make_zero_final_share_vector() -> dict[str, Any]:
     Construct a deterministic polynomial whose FINAL share for
     participant 0 is zero.
 
-        f_final(1) = sign*(a_0 + a_1) + tweak = 0
+        f_final(1) = sign*a_0 + tweak + a_1 = 0
     """
     a_0 = Scalar(17)
 
@@ -102,7 +102,7 @@ def make_zero_final_share_vector() -> dict[str, Any]:
     )
 
     sign = Scalar(1) if (a_0 * G).has_even_y() else -Scalar(1)
-    a_1 = -a_0 - sign * tweak
+    a_1 = -sign * a_0 - tweak
 
     return {
         "name": "zero_final_share",
@@ -280,7 +280,7 @@ def build_vectors() -> dict[str, Any]:
     valid = [
         make_valid_vector(
             name="odd_y_initial_key",
-            comment="Odd-Y initial key requires negating all coefficients before tweaking.",
+            comment="Odd-Y initial key requires negating only the constant coefficient before tweaking.",
             n=3,
             coeff_ints=[6, 5, 0],
         ),

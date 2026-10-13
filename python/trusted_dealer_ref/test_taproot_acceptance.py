@@ -128,7 +128,8 @@ def test_participant_rejects_invalid_tweak(output, monkeypatch, failure):
 @pytest.mark.parametrize("a0", [6, 7])
 def test_zero_tweak_is_valid_and_keeps_even_y_normalization(a0, monkeypatch):
     monkeypatch.setattr(td, "tagged_hash", lambda tag, data: bytes(32))
-    output = td.trusted_dealer_keygen_internal([Scalar(a0), Scalar(2)], 3)
+    # Keep all final shares nonzero after normalizing only the constant.
+    output = td.trusted_dealer_keygen_internal([Scalar(a0), Scalar(5)], 3)
     assert GE.from_bytes_compressed(output.thresh_pk).has_even_y()
     assert output.thresh_pk[1:] == output.original_pk[1:]
     td.participant_key_accept(
