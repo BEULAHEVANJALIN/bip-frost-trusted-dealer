@@ -1,0 +1,129 @@
+{
+  "description": "ParticipantKeyAccept: valid base inputs, replacements, and shared invalid point encodings.",
+  "base": {
+    "id": 0,
+    "n": 3,
+    "t": 2,
+    "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+    "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+    "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+    "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+    "pubshares": [
+      "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+      "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac",
+      "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
+    ]
+  },
+  "point_encoding_error_cases": [
+    {
+      "name": "padded_point",
+      "comment": "34-byte encoding of the valid public share at index 1.",
+      "value": "0200ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac"
+    },
+    {
+      "name": "infinity",
+      "value": "000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "invalid_prefix",
+      "value": "04ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac"
+    },
+    {
+      "name": "coordinate_out_of_range",
+      "value": "02ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+  ],
+  "error_test_cases": [
+    {
+      "name": "unrelated_original_key",
+      "comment": "A0 does not produce the supplied A1.",
+      "replace": {
+        "original_pk": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+      },
+      "expected_failure": "taproot_relationship"
+    },
+    {
+      "name": "wrong_output_parity",
+      "comment": "Correct output X coordinate, incorrect Y parity.",
+      "replace": {
+        "thresh_pk": "02a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a"
+      },
+      "expected_failure": "taproot_relationship"
+    },
+    {
+      "name": "keys_from_another_commitment",
+      "comment": "Valid A0/A1 pair does not belong to this commitment.",
+      "replace": {
+        "original_pk": "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc",
+        "thresh_pk": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3"
+      },
+      "expected_failure": "threshold_key_mismatch"
+    },
+    {
+      "name": "missing_even_y_normalization",
+      "comment": "Share passes VSS but A0 was not normalized before tweaking.",
+      "replace": {
+        "thresh_pk": "02411ef3f61fa8e2fb6cce3716df8d3fa5ea8dd998ac5a4127caeab61cfb0778ae",
+        "vss_commitment": "02411ef3f61fa8e2fb6cce3716df8d3fa5ea8dd998ac5a4127caeab61cfb0778ae022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba584e",
+        "pubshares": null
+      },
+      "expected_failure": "taproot_relationship"
+    },
+    {
+      "name": "wrong_public_share",
+      "comment": "Public share belongs to another identifier.",
+      "replace": {
+        "pubshares": [
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe",
+          "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
+        ]
+      },
+      "expected_failure": "pubshare_mismatch"
+    },
+    {
+      "name": "incomplete_public_shares",
+      "comment": "Supplied public-share list has fewer than n entries.",
+      "replace": {
+        "pubshares": [
+          "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50",
+          "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac"
+        ]
+      },
+      "expected_failure": "pubshare_count"
+    },
+    {
+      "name": "negative_identifier",
+      "comment": "Identifier -1 would map to the forbidden evaluation point zero.",
+      "replace": {
+        "id": -1
+      },
+      "expected_failure": "invalid_identifier"
+    },
+    {
+      "name": "identifier_at_count",
+      "comment": "Identifier n is outside the participant range.",
+      "replace": {
+        "id": 3
+      },
+      "expected_failure": "invalid_identifier"
+    },
+    {
+      "name": "tampered_secret_share",
+      "comment": "Canonical nonzero scalar fails the Feldman equation.",
+      "replace": {
+        "secshare": "0000000000000000000000000000000000000000000000000000000000000001"
+      },
+      "expected_failure": "invalid_secret_share"
+    },
+    {
+      "name": "tampered_commitment",
+      "comment": "Changing a nonconstant commitment invalidates the share.",
+      "replace": {
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556"
+      },
+      "expected_failure": "invalid_secret_share"
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "description": "Distinct parameter, secret-scalar, and commitment parsing failures.",
+  "parameter_error_cases": [
+    {
+      "name": "zero_threshold",
+      "t": 0,
+      "n": 1
+    },
+    {
+      "name": "threshold_above_count",
+      "t": 2,
+      "n": 1
+    },
+    {
+      "name": "zero_participants",
+      "t": 1,
+      "n": 0
+    },
+    {
+      "name": "too_many_participants",
+      "t": 1,
+      "n": 129
+    }
+  ],
+  "scalar_error_cases": [
+    {
+      "name": "wrong_length",
+      "comment": "31-byte encoding of 1; exactly 32 bytes are required.",
+      "value": "00000000000000000000000000000000000000000000000000000000000001"
+    },
+    {
+      "name": "zero",
+      "value": "0000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "group_order",
+      "value": "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141"
+    }
+  ],
+  "commitment_error_cases": [
+    {
+      "name": "wrong_length",
+      "comment": "65 bytes instead of 33*t = 66.",
+      "t": 2,
+      "value": "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    },
+    {
+      "name": "infinity_constant",
+      "t": 2,
+      "value": "0000000000000000000000000000000000000000000000000000000000000000000279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798"
+    },
+    {
+      "name": "invalid_point_prefix",
+      "t": 2,
+      "value": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798040000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ]
+}

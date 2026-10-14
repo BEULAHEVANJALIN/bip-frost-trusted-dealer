@@ -8,6 +8,7 @@ from .trusted_dealer_ref import (
     # Functions
     trusted_dealer_keygen,
     trusted_dealer_keygen_internal,
+    participant_key_accept,
     derive_pubshare_from_commitment,
     thresh_pubkey_from_commitment,
     verify_secshare,
@@ -18,12 +19,15 @@ from .trusted_dealer_ref import (
     random_nonzero_scalar,
     # Types
     DealerOutput,
+    ParticipantAcceptedKeyMaterial,
     PlainPk,
+    VSSCommitment,
 )
 
 __all__ = [
     "trusted_dealer_keygen",
     "trusted_dealer_keygen_internal",
+    "participant_key_accept",
     "derive_pubshare_from_commitment",
     "thresh_pubkey_from_commitment",
     "verify_secshare",
@@ -33,5 +37,7 @@ __all__ = [
     "random_scalar",
     "random_nonzero_scalar",
     "DealerOutput",
+    "ParticipantAcceptedKeyMaterial",
     "PlainPk",
+    "VSSCommitment",
 ]

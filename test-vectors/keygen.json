@@ -1,0 +1,249 @@
+{
+  "description": "TrustedDealerKeygenInternal: deterministic inputs, expected outputs, and failure.",
+  "valid_test_cases": [
+    {
+      "name": "bip341_1_of_1",
+      "comment": "Published BIP 341 no-script-path example; also covers 1-of-1.",
+      "inputs": {
+        "n": 1,
+        "coefficients": [
+          "6b973d88838f27366ed61c9ad6367663045cb456e28335c109e30717ae0c6baa"
+        ]
+      },
+      "expected": {
+        "tweak": "b86e7be8f39bab32a6f2c0443abbc210f0edac0e2c53d501b36b64437d9c6c70",
+        "coefficients": [
+          "2405b971772ad26915c8dcdf10f238753a9b837e5f8e6a86fd7c0cce5b7296d9"
+        ],
+        "original_pk": "02d6889cb081036e0faefa3a35157ad71086b123b2b144b649798b494c300a961d",
+        "thresh_pk": "0353a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343",
+        "vss_commitment": "0353a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343",
+        "shares": [
+          {
+            "id": 0,
+            "secshare": "2405b971772ad26915c8dcdf10f238753a9b837e5f8e6a86fd7c0cce5b7296d9",
+            "pubshare": "0353a1f6e454df1aa2776a2814a721372d6258050de330b3c6d10ee8f4e0dda343"
+          }
+        ]
+      },
+      "source": "https://github.com/bitcoin/bips/blob/master/bip-0341/wallet-test-vectors.json"
+    },
+    {
+      "name": "even_y_2_of_3",
+      "comment": "Even-Y initial key and each possible 2-of-3 reconstruction.",
+      "inputs": {
+        "n": 3,
+        "coefficients": [
+          "0000000000000000000000000000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000000000000000000000000000002"
+        ]
+      },
+      "expected": {
+        "tweak": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30e7",
+        "coefficients": [
+          "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30e8",
+          "0000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "original_pk": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "thresh_pk": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21",
+        "vss_commitment": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d2102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+        "shares": [
+          {
+            "id": 0,
+            "secshare": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30ea",
+            "pubshare": "02f14de157ceb8bffde7641f27b67eb54584d4fa3b81a54ac03785035a4f4e3e30"
+          },
+          {
+            "id": 1,
+            "secshare": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30ec",
+            "pubshare": "0314e02518221f237b4ff842e707b2ef8ac53586b74bd87801ac64d904c311e268"
+          },
+          {
+            "id": 2,
+            "secshare": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30ee",
+            "pubshare": "033e22a28e0c55125b7c8a4aef6d7b0c74e40709c8be23a7c97732cd24a84eac9f"
+          }
+        ]
+      }
+    },
+    {
+      "name": "odd_y_3_of_3",
+      "comment": "Odd-Y normalization changes only the constant; zero leading coefficient is allowed.",
+      "inputs": {
+        "n": 3,
+        "coefficients": [
+          "0000000000000000000000000000000000000000000000000000000000000006",
+          "0000000000000000000000000000000000000000000000000000000000000005",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ]
+      },
+      "expected": {
+        "tweak": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5843",
+        "coefficients": [
+          "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba583d",
+          "0000000000000000000000000000000000000000000000000000000000000005",
+          "0000000000000000000000000000000000000000000000000000000000000000"
+        ],
+        "original_pk": "03fff97bd5755eeea420453a14355235d382f6472f8568a18b2f057a1460297556",
+        "thresh_pk": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a",
+        "vss_commitment": "03a8e1f6946495d797bda3c3c6a88cf34375130c57a42a966c9a0508bf3cc2fc1a022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4000000000000000000000000000000000000000000000000000000000000000000",
+        "shares": [
+          {
+            "id": 0,
+            "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5842",
+            "pubshare": "0320d5dcd0c91887d78325a396c0979499d7e6be0b4a6725c9bb1c76a534666d50"
+          },
+          {
+            "id": 1,
+            "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba5847",
+            "pubshare": "02ac3cb30cabb2f351e04c642a5bdef0cf6a6d6d295b08474be1e32c1f2f9136ac"
+          },
+          {
+            "id": 2,
+            "secshare": "25fee0b2ff9076ea93b70323592f582d29a4139ce98af1843c67265ce1ba584c",
+            "pubshare": "037e3811ad71b87e2efe3f3d20bc2dd0fcc963269bb2a3c6b7669a6278410459fe"
+          }
+        ]
+      }
+    },
+    {
+      "name": "equal_commitments",
+      "comment": "Equal nonconstant commitments occupy distinct slots; nonzero quadratic term.",
+      "inputs": {
+        "n": 4,
+        "coefficients": [
+          "0000000000000000000000000000000000000000000000000000000000000007",
+          "0000000000000000000000000000000000000000000000000000000000000005",
+          "0000000000000000000000000000000000000000000000000000000000000005"
+        ]
+      },
+      "expected": {
+        "tweak": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3aef",
+        "coefficients": [
+          "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3af6",
+          "0000000000000000000000000000000000000000000000000000000000000005",
+          "0000000000000000000000000000000000000000000000000000000000000005"
+        ],
+        "original_pk": "025cbdf0646e5db4eaa398f365f2ea7a0e3d419b7e0330e39ce92bddedcac4f9bc",
+        "thresh_pk": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3",
+        "vss_commitment": "0219cba5b63bdcbf46629edf17cda13bce567b90442bb421eae8a32e35843967c3022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4022f8bde4d1a07209355b4a7250a5c5128e88b84bddc619ab7cba8d569b240efe4",
+        "shares": [
+          {
+            "id": 0,
+            "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3b00",
+            "pubshare": "03c4586dcda1b1631374bf1bbd7a7eeb4c7c239bd40a4a7230daac0a5b21153177"
+          },
+          {
+            "id": 1,
+            "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3b14",
+            "pubshare": "03e9f06718f20609ce5fce72adffbd98de1e31523c78e51a86e8b9062576bcb8fc"
+          },
+          {
+            "id": 2,
+            "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3b32",
+            "pubshare": "03cfb4f362ac026e5e179ba14a8e90de0bbe569020ed0420df7788d5b378395f69"
+          },
+          {
+            "id": 3,
+            "secshare": "73405f6715d73c76ed480d370e965e55bc8fb0bf3029d6a68fc4b30ca59f3b5a",
+            "pubshare": "02fadb556b068063afb1125be02b5c5f50cc65862f56770945ade3ae94193a47f3"
+          }
+        ]
+      }
+    },
+    {
+      "name": "zero_initial_share",
+      "comment": "An initial zero share is allowed when the final share is nonzero.",
+      "inputs": {
+        "n": 2,
+        "coefficients": [
+          "000000000000000000000000000000000000000000000000000000000000001d",
+          "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364124"
+        ]
+      },
+      "expected": {
+        "tweak": "c43aa178b5abfdc051ba7b83e0a1616b99a8a0f91f4a68a5b48ec3a4fd73d3fd",
+        "coefficients": [
+          "c43aa178b5abfdc051ba7b83e0a1616b99a8a0f91f4a68a5b48ec3a4fd73d41a",
+          "fffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364124"
+        ],
+        "original_pk": "02c44d12c7065d812e8acf28d7cbb19f9011ecd9e9fdf281b0e6a3b5e87d22e7db",
+        "thresh_pk": "0315cb9414c636c5a4158390ad76c3f66629c3b32d268ccddf3c603834c69b5762",
+        "vss_commitment": "0315cb9414c636c5a4158390ad76c3f66629c3b32d268ccddf3c603834c69b576203c44d12c7065d812e8acf28d7cbb19f9011ecd9e9fdf281b0e6a3b5e87d22e7db",
+        "shares": [
+          {
+            "id": 0,
+            "secshare": "c43aa178b5abfdc051ba7b83e0a1616b99a8a0f91f4a68a5b48ec3a4fd73d3fd",
+            "pubshare": "0206e2fb3a256c4ff5aafa0b39eaf30944df0351e6811327a355fccd3a72abd943"
+          },
+          {
+            "id": 1,
+            "secshare": "c43aa178b5abfdc051ba7b83e0a1616b99a8a0f91f4a68a5b48ec3a4fd73d3e0",
+            "pubshare": "03791acba4ec327e4ec20cd8a5f366a2e68a20bcc148858cc9e01ded1b2e2af82d"
+          }
+        ]
+      }
+    },
+    {
+      "name": "maximum_participants",
+      "comment": "n=128; only the first and last expected shares are serialized.",
+      "inputs": {
+        "n": 128,
+        "coefficients": [
+          "0000000000000000000000000000000000000000000000000000000000000001",
+          "0000000000000000000000000000000000000000000000000000000000000002"
+        ]
+      },
+      "expected": {
+        "tweak": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30e7",
+        "coefficients": [
+          "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30e8",
+          "0000000000000000000000000000000000000000000000000000000000000002"
+        ],
+        "original_pk": "0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798",
+        "thresh_pk": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d21",
+        "vss_commitment": "03da4710964f7852695de2da025290e24af6d8c281de5a0b902b7135fd9fd74d2102c6047f9441ed7d6d3045406e95c07cd85c778e4b8cef3ca7abac09b95c709ee5",
+        "shares": [
+          {
+            "id": 0,
+            "secshare": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa30ea",
+            "pubshare": "02f14de157ceb8bffde7641f27b67eb54584d4fa3b81a54ac03785035a4f4e3e30"
+          },
+          {
+            "id": 127,
+            "secshare": "3cf5216d476a5e637bf0da674e50ddf55c403270dd36494dfcca438132fa31e8",
+            "pubshare": "0304016e974bd589108c82ea8850b43b1cb5d2cd2f15834e6693bd1e3d608aa046"
+          }
+        ]
+      },
+      "reconstruction_subsets": [
+        [
+          0,
+          1
+        ],
+        [
+          0,
+          127
+        ],
+        [
+          126,
+          127
+        ]
+      ]
+    }
+  ],
+  "error_test_cases": [
+    {
+      "name": "zero_final_share",
+      "comment": "The final share at x=1 is zero and must be rejected.",
+      "inputs": {
+        "n": 2,
+        "coefficients": [
+          "0000000000000000000000000000000000000000000000000000000000000011",
+          "fffd80913cb1712fa40a17cd2cd5a59272e981c4b9f37935e6a4e7935428467e"
+        ]
+      },
+      "expected_failure": "zero_final_share"
+    }
+  ]
+}
